@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace TomikTests
 {
-    public class RegistrationAccountTests : BaseTest
+    public class RegistrationAccountTests: BaseTest
     {
         [Test]
         [Category("Registration account tests")]
