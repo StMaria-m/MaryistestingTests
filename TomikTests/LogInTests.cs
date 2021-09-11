@@ -10,7 +10,7 @@ namespace TomikTests
         [Category("User login  account tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Poprawne logowanie na konto użytkownika")]
-        public void Test33()
+        public void Test1()
         {
             //1. Uzupełnić pole "Chomik"
             var login = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
@@ -47,7 +47,7 @@ namespace TomikTests
         [Category("User log in account tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Sprawdzenie logowania za pomocą adresu e-mail")]
-        public void Test6()
+        public void Test2()
         {
             //1. W polu "Chomik" wpisać nazwę adres e-mail, np. "abcdef@w.ple"
             var loginInput = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
@@ -70,7 +70,7 @@ namespace TomikTests
         [Category("User log in account tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Sprawdzenie logowania bez podania hasła")]
-        public void Test5()
+        public void Test3()
         {
             //1.  W polu nazwa chomika wpisać niepoprawną nazwę np. "hjghjghgjhhjhjg"
             var loginInput = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
@@ -82,8 +82,7 @@ namespace TomikTests
 
             Thread.Sleep(300);
 
-            //co chce sprawdzić/ co chcesz zobaczyć
-            //1. Sprawdzam komunika walidacyjny formularza (jaki?) - "Niepoprawne dane logowania"
+            //3. Sprawdzam komunikat walidacyjny formularza (jaki?) - "Niepoprawne dane logowania"
             var loginError = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
             StringAssert.Contains("Niepoprawne dane logowania", loginError.Text);
         }
@@ -100,8 +99,7 @@ namespace TomikTests
 
             Thread.Sleep(300);
 
-            //co chce sprawdzić/ co chcesz zobaczyć
-            //1. Sprawdzam komunika walidacyjny formularza (jaki?) - "Podaj nazwę chomika"
+            //2. Sprawdzam komunikat walidacyjny formularza (jaki?) - "Podaj nazwę chomika"
             var loginError = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
             StringAssert.Contains("Podaj nazwę chomika", loginError.Text);
         }

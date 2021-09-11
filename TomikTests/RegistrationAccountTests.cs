@@ -10,7 +10,7 @@ namespace TomikTests
         [Category("Registration account tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Utworzenie nowego konta użytkownika z poprawnym uzupełnieniem formularza")]
-        public void TestRegistration()
+        public void TestRegistration1()
         {
             //1. Uzupełnić pole "Twój email"
             var registrationEmail = _webDriver.FindElement(By.CssSelector(".registration-email"));
@@ -30,7 +30,7 @@ namespace TomikTests
 
             Thread.Sleep(300);
 
-            //4.Kliknąć "Zaloguj"
+            //4.Kliknąć "Załóż konto"
             var createButton = _webDriver.FindElement(By.CssSelector("#registrationForm .orangeButtonCSS"));
             createButton.Click();
 
@@ -58,6 +58,7 @@ namespace TomikTests
             catch (OpenQA.Selenium.NoSuchElementException)
             {
                 Assert.Fail("Captcha not found");
+                return;
             }
 
             Assert.Pass();
@@ -67,7 +68,7 @@ namespace TomikTests
         [Category("Registration account tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Użycie za słabego hasła podczas rejestracji nowego użytkownika")]
-        public void TestRegistration1()
+        public void TestRegistration2()
         {
             //1.Uzupełnić pole "Twój e-mail"
             var registrationEmail = _webDriver.FindElement(By.CssSelector(".registration-email"));
@@ -96,7 +97,7 @@ namespace TomikTests
         [Category("Registration account tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Użycie hasła niezgodnego z walidacją podczas rejestracji nowego użytkownika")]
-        public void TestRegistration2()
+        public void TestRegistration3()
         {
             //1.Uzupełnić pole "Twój e-mail"
             var registrationEmail = _webDriver.FindElement(By.CssSelector(".registration-email"));
@@ -105,7 +106,7 @@ namespace TomikTests
             Thread.Sleep(300);
 
             //2.Uzupełnić pole "Nazwa konta"
-            var accountName = _webDriver.FindElement(By.CssSelector(".registration-accountName"));
+            var accountName = _webDriver.FindElement(By.CssSelector(".registration-accountName")); 
             accountName.SendKeys("qwertyu");
 
             Thread.Sleep(300);
@@ -116,9 +117,47 @@ namespace TomikTests
 
             Thread.Sleep(1300);
 
-            //4. Sprawdzić komunikat walidacyjny formularza
-            var passwordError = _webDriver.FindElement(By.CssSelector(".registration-status-password"));
+            //4.Kliknąć "Załóż konto"
+            var createButton = _webDriver.FindElement(By.CssSelector("input.orangeButtonCSS"));
+            createButton.Click();
+
+            //5. Sprawdzić komunikat walidacyjny formularza
+            var passwordError = _webDriver.FindElement(By.CssSelector("#topbar .registration-status-password.registrationError"));//nie wiem jak to znaleźć???
             StringAssert.Contains("Hasło musi posiadać przynajmniej 6 znaków, w tym jedną dużą literę lub cyfrę albo znak specjalny.", passwordError.Text);
-        }       
+        }
+
+        [Test]
+        [Category("Registration account tests")]
+        [Author("Maria", "http://maryistesting.com")]
+        [Description("Użycie hasła niezgodnego z walidacją podczas rejestracji nowego użytkownika")]
+        public void TestRegistration4()
+        {
+            //1.Uzupełnić pole "Twój e-mail"
+            var registrationEmail = _webDriver.FindElement(By.CssSelector(".registration-email"));
+            registrationEmail.SendKeys("qwertyu@qw.ou");
+
+            Thread.Sleep(300);
+
+            //2.Usunąć automatycznie wpisaną nazwę użytkownika
+            var accountName = _webDriver.FindElement(By.CssSelector("#AccountName"));
+            accountName.Clear();
+
+
+            Thread.Sleep(300);
+
+            //3.Uzupełnić pole "Nazwa konta" jedną literą lub cyfrą
+            var accountName2 = _webDriver.FindElement(By.CssSelector(".registration-accountName"));
+            accountName2.SendKeys("a");
+
+            //4.Kliknąć "Załóż konto"
+            var createButton = _webDriver.FindElement(By.CssSelector("input.orangeButtonCSS"));
+            createButton.Click();
+
+            Thread.Sleep(500);
+
+            //5. Sprawdzić komunikat walidacyjny formularza
+            var nameAccountError = _webDriver.FindElement(By.CssSelector("#topbar .registration-status-account.registrationError"));
+            StringAssert.Contains("Nazwa musi mieć conajmniej 3 znaki.", nameAccountError.Text);
+        }
     }
 }
