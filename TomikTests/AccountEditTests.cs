@@ -5,12 +5,13 @@ using System.Threading;
 
 namespace TomikTests
 {
+    [Description("Edycja ustawień konta użytkownika")]
     public class AccountEditTests : BaseTest
     {
         [Test]
         [Category("User account operations tests")]
         [Author("Maria", "http://maryistesting.com")]
-        [Description("Edycja ustawień konta użytkownika - zakładka 'O Tobie' poprawny zapis danych i sprawdzenie ich wyświetlenia w profilu użytkownika")]
+        [Description("Zakładka 'O Tobie' poprawny zapis danych i sprawdzenie ich wyświetlenia w profilu użytkownika")]
         public void Test3()
         {
             LogInSteps();
@@ -21,7 +22,7 @@ namespace TomikTests
 
             //Uzupełnić pole "Imię"            
             var name = _webDriver.FindElement(By.CssSelector("#Name"));
-            string exampleName =  $"{name.Text}a";
+            string exampleName = $"{name.Text}a";
             name.Clear();
             name.SendKeys(exampleName);
 
@@ -36,7 +37,7 @@ namespace TomikTests
             Thread.Sleep(1000);
 
             RemoveAcceptContainer();
-                        
+
             try
             {
                 //Sprawdzenie płci - jeśli pojawi się symbol wybranej powyżej płci
@@ -63,6 +64,34 @@ namespace TomikTests
             Assert.Pass();
         }
 
+
+        [Test]
+        [Category("User account operations tests")]
+        [Author("Maria", "http://maryistesting.com")]
+        [Description("Zakładka 'O Tobie' niepoprawnie uzupełniony e-mail")]
+        public void Test33()
+        {
+            LogInSteps();
+
+            ClickOptionStep();
+
+            ClickAboutMeTabStep();
+
+            //Kliknąć link "zmień adres"
+            var changeEmail = _webDriver.FindElement(By.CssSelector(".btnChangeEmail"));
+            changeEmail.Click();
+
+            //Uzupełnić pole "e-mail"            
+            var newEmail = _webDriver.FindElement(By.CssSelector("#Email"));
+            newEmail.SendKeys("aaa");
+
+            _webDriver.FindElement(By.TagName("body")).Click();
+
+            //Sprawdzenie, czy pojawi się komunikat "błędny adres e-mail"
+            var emailError = _webDriver.FindElement(By.CssSelector("#divEmail span[for=Email]"));
+            StringAssert.Contains("błędny adres e-mail", emailError.Text);
+        }
+
         [Test]
         [Category("User account operations tests")]
         [Author("Maria", "http://maryistesting.com")]
@@ -75,7 +104,7 @@ namespace TomikTests
             LogInSteps();
 
             ClickOptionStep();
-            
+
             ClickSettingsTabStep();
 
             try
@@ -89,7 +118,7 @@ namespace TomikTests
             catch (OpenQA.Selenium.NoSuchElementException)
             {
                 //nic nierób checkbox nie był zaznaczony
-            }            
+            }
 
             //Kliknąć przycisk 'jestem pełnoletni i chcę domyślnie widzieć także treści przeznaczone tylko dla takich osób'
             var checkbox = _webDriver.FindElement(By.CssSelector(checkboxSelector));
@@ -137,7 +166,7 @@ namespace TomikTests
             catch (OpenQA.Selenium.NoSuchElementException)
             {
                 //nic nierób checkbox nie był zaznaczony
-            }            
+            }
 
             //7. Kliknąć przycisk 'pokazuj dodatkowe okno z linkiem przyjaznym akceleratorom pobierania dla plików'
             var checkbox = _webDriver.FindElement(By.CssSelector(checkboxSelector));
@@ -156,10 +185,10 @@ namespace TomikTests
                 return;
             }
 
-            Assert.Pass();           
+            Assert.Pass();
         }
 
-        
+
         [Test]
         [Category("User account operations tests")]
         [Author("Maria", "http://maryistesting.com")]
@@ -258,7 +287,7 @@ namespace TomikTests
             Assert.Pass();
         }
 
-        
+
         [Test]
         [Category("User account operations tests")]
         [Author("Maria", "http://maryistesting.com")]
@@ -322,7 +351,7 @@ namespace TomikTests
             ClickOptionStep();
 
             ClickSettingsTabStep();
-            
+
             try
             {
                 //6. Jeżeli checkbox jest już zaznaczony to odznacz i przeładuj stronę
@@ -403,6 +432,167 @@ namespace TomikTests
 
             Assert.Pass();
         }
+             
+
+        [Test]
+        [Category("User account operations tests")]
+        [Author("Maria", "http://maryistesting.com")]
+        [Description("Zakładka 'Hasła dostępu' poprawne ustawienie hasłą dostępu innych użytkowników podczas przeglądania plików użytkownika")]
+        public void Test11()
+        {
+            string password = "abc123";
+
+            LogInSteps();
+
+            ClickOptionStep();
+
+            ClickAccessTabStep();
+
+            try
+            {
+                //Jeżeli hasło jest już ustawione to przywracamy do opcji "Dla wszystkich"
+                var optionByPasswordSelected = _webDriver.FindElement(By.CssSelector("#cbAccessRead .OptionByPassword[selected]"));
+                var accessType2 = _webDriver.FindElement(By.CssSelector("#cbAccessRead"));
+                new SelectElement(accessType2).SelectByValue("ForAll");
+                _webDriver.Navigate().Refresh();
+                RemoveAcceptContainer();
+            }
+            catch (OpenQA.Selenium.NoSuchElementException)
+            {
+                //nic nie rób wybrana była opcja "Dla wszystkich"
+            }
+
+            // wybrać z listy rozwijanej przeglądanie "Na hasło"
+            var accessType = _webDriver.FindElement(By.CssSelector("#cbAccessRead"));
+            new SelectElement(accessType).SelectByValue("ByPassword");
+
+            //wpisać "Nowe hasło"
+            var previewPassword = _webDriver.FindElement(By.CssSelector("#read_Passowrd"));
+            previewPassword.SendKeys(password);
+
+            //powtórzyć nowe hasło
+            var confirmPreviewPassword = _webDriver.FindElement(By.CssSelector("#read_ConfirmPassword"));
+            confirmPreviewPassword.SendKeys(password);
+
+            //kliknąć "Zapisz"
+            var submitButton = _webDriver.FindElement(By.CssSelector("#passwordReadForm input[type=submit].greenButtonCSS"));
+            submitButton.Click();
+
+            try
+            {
+                //Sprawdzenie czy hasło do przeglądania plików zostało utworzone
+                _webDriver.FindElement(By.CssSelector("#changeReadPassBtn"));
+            }
+            catch (OpenQA.Selenium.NoSuchElementException)
+            {
+                Assert.Fail("Creating access password is failed");
+                return;
+            }
+
+            Assert.Pass();
+
+        }
+
+        [Test]
+        [Category("User account operations tests")]
+        [Author("Maria", "http://maryistesting.com")]
+        [Description("Zakładka 'Hasła dostępu' poprawne ustawienie haseł dostępu innych użytkowników do modyfikacji zawartości")]
+        public void Test12()
+        {
+            string password = "abc123";
+
+            LogInSteps();
+
+            ClickOptionStep();
+
+            ClickAccessTabStep();
+
+            try
+            {
+                //Jeżeli hasło jest już ustawione to przywracamy do opcji "Tylko właściciel"
+                var optionByPasswordSelected = _webDriver.FindElement(By.CssSelector("#cbAccessControl .OptionByPassword[selected]"));
+                var accessType2 = _webDriver.FindElement(By.CssSelector("#cbAccessControl"));
+                new SelectElement(accessType2).SelectByValue("OwnerOnly");
+                _webDriver.Navigate().Refresh();
+                RemoveAcceptContainer();
+            }
+            catch (OpenQA.Selenium.NoSuchElementException)
+            {
+                //nic nie rób wybrana była opcja "Tylko właściciel"
+            }
+
+            // wybrać z listy rozwijanej modyfikację zawartości "Na hasło"
+            var accessType = _webDriver.FindElement(By.CssSelector("#cbAccessControl"));
+            new SelectElement(accessType).SelectByValue("ByPassword");
+
+            //wpisać "Nowe hasło"
+            var previewPassword = _webDriver.FindElement(By.CssSelector("#control_Passowrd"));
+            previewPassword.SendKeys(password);
+
+            //powtórzyć nowe hasło
+            var confirmPreviewPassword = _webDriver.FindElement(By.CssSelector("#control_ConfirmPassword"));
+            confirmPreviewPassword.SendKeys(password);
+
+            //kliknąć "Zapisz"
+            var submitButton = _webDriver.FindElement(By.CssSelector("#passwordControlForm input[type=submit].greenButtonCSS"));
+            submitButton.Click();
+
+            try
+            {
+                //Sprawdzenie czy hasło do modyfikowania plików zostało utworzone
+                _webDriver.FindElement(By.CssSelector("#changeControlPassBtn"));
+            }
+            catch (OpenQA.Selenium.NoSuchElementException)
+            {
+                Assert.Fail("Creating access password is failed");
+                return;
+            }
+
+            Assert.Pass();
+
+        }
+
+        [Test]
+        [Category("User account operations tests")]
+        [Author("Maria", "http://maryistesting.com")]
+        [Description("Zakładka 'Hasła dostępu' niepoprawne ustawienie haseł dostępu innych użytkowników do modyfikacji zawartości i weryfikacja komunikatów")]
+        public void Test13()
+        {
+            LogInSteps();
+
+            ClickOptionStep();
+
+            //kliknąć zakładkę "Hasła dostępu"
+            var accessPassword = _webDriver.FindElement(By.CssSelector("#tabMenu a[href$=passwords]"));
+            accessPassword.Click();
+
+            try
+            {
+                //Jeżeli hasło jest już ustawione to przywracamy do opcji "Tylko właściciel"
+                var optionByPasswordSelected = _webDriver.FindElement(By.CssSelector("#cbAccessControl .OptionByPassword[value=ByPassword]"));
+                var accessType2 = _webDriver.FindElement(By.CssSelector("#cbAccessControl"));
+                new SelectElement(accessType2).SelectByValue("OwnerOnly");
+                _webDriver.Navigate().Refresh();
+                RemoveAcceptContainer();
+            }
+            catch (OpenQA.Selenium.NoSuchElementException)
+            {
+                //nic nie rób wybrana była opcja "Tylko właściciel"
+            }
+
+            // wybrać z listy rozwijanej modyfikację zawartości "Na hasło"
+            var accessType = _webDriver.FindElement(By.CssSelector("#cbAccessControl"));
+            new SelectElement(accessType).SelectByValue("ByPassword");
+
+            //wpisać "Nowe hasło"
+            var previewPassword = _webDriver.FindElement(By.CssSelector("#control_Passowrd"));
+            previewPassword.SendKeys(":");
+            _webDriver.FindElement(By.TagName("body")).Click();
+
+            //Sprawdzenie, czy pojawi się komunikat "Hasło musi posiadać przynajmniej 6 znaków, w tym jedną dużą literę lub cyfrę albo znak specjalny."
+            var shortPassword = _webDriver.FindElement(By.CssSelector("#passwordControlForm span[for=control_Passowrd]"));
+            StringAssert.Contains("Hasło musi posiadać przynajmniej 6 znaków, w tym jedną dużą literę lub cyfrę albo znak specjalny.", shortPassword.Text);
+        }
 
         private void ClickOptionStep()
         {
@@ -422,6 +612,12 @@ namespace TomikTests
         {
             var settingsButton = _webDriver.FindElement(By.CssSelector("#tabMenu a[href$=settings]"));
             settingsButton.Click();
+        }
+
+        private void ClickAccessTabStep()
+        {
+            var accessButton = _webDriver.FindElement(By.CssSelector("#tabMenu a[href$=passwords]"));
+            accessButton.Click();
         }
     }
 }
