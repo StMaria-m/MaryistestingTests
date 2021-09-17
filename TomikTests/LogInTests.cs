@@ -12,27 +12,11 @@ namespace TomikTests
         [Description("Poprawne logowanie na konto użytkownika")]
         public void Test1()
         {
-            //1. Uzupełnić pole "Chomik"
-            var login = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
-            login.SendKeys("");
-
-            Thread.Sleep(300);
-
-            //2. Uzupełnić pole "Hasło"
-            var password = _webDriver.FindElement(By.CssSelector("#topBarPassword"));
-            password.SendKeys("");
-
-            Thread.Sleep(300);
-
-            //3. Uliknąć przycisk "Zaloguj"
-            var createButton = _webDriver.FindElement(By.CssSelector("#topBar_LoginBtn"));
-            createButton.Click();
-
-            Thread.Sleep(1000);
+            LogInSteps();
 
             try
             {
-                //4. Sprawdzenie czy użytkownik jest zalogowany (przycisk wyloguj się pojawił)
+                // Sprawdzenie czy użytkownik jest zalogowany (przycisk wyloguj się pojawił)
                 _webDriver.FindElement(By.CssSelector("#logout"));
             }
             catch (OpenQA.Selenium.NoSuchElementException)
@@ -49,15 +33,9 @@ namespace TomikTests
         [Description("Sprawdzenie logowania za pomocą adresu e-mail")]
         public void Test2()
         {
-            //1. W polu "Chomik" wpisać nazwę adres e-mail, np. "abcdef@w.ple"
-            var loginInput = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
-            loginInput.SendKeys("abcdef@w.ple");
+            FillInLoginSteps("abcdef@w.ple");
 
-            Thread.Sleep(300);
-
-            //2. Kliknąć w przycisk Zaloguj
-            var loginButton = _webDriver.FindElement(By.CssSelector("#topBar_LoginBtn"));
-            loginButton.Click();
+            ClickLoginButton();
 
             Thread.Sleep(300);
 
@@ -72,13 +50,9 @@ namespace TomikTests
         [Description("Sprawdzenie logowania bez podania hasła")]
         public void Test3()
         {
-            //1.  W polu nazwa chomika wpisać niepoprawną nazwę np. "hjghjghgjhhjhjg"
-            var loginInput = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
-            loginInput.SendKeys("hjghjghgjhhjhjg");
+            FillInLoginSteps("hgdghjhdsfgjfdgg");
 
-            //2. kliknąć w przycisk Zaloguj
-            var loginButton = _webDriver.FindElement(By.CssSelector("#topBar_LoginBtn"));
-            loginButton.Click();
+            ClickLoginButton();
 
             Thread.Sleep(300);
 
@@ -93,15 +67,68 @@ namespace TomikTests
         [Description("Sprawdzenie logowania bez podania danych")]
         public void Test4()
         {
-            //1. kliknąć w przycisk Zaloguj
-            var loginButton = _webDriver.FindElement(By.CssSelector("#topBar_LoginBtn"));
-            loginButton.Click();
+            ClickLoginButton();
 
             Thread.Sleep(300);
 
             //2. Sprawdzam komunikat walidacyjny formularza (jaki?) - "Podaj nazwę chomika"
             var loginError = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
             StringAssert.Contains("Podaj nazwę chomika", loginError.Text);
+        }
+
+        [Test]
+        [Category("User login  account tests")]
+        [Author("Maria", "http://maryistesting.com")]
+        [Description("Niepoprawne logowanie na konto użytkownika -błędny login i hasło")]
+        public void Test1a()
+        {
+            FillInLoginSteps("a");
+
+            FillInPasswordSteps("a");
+            
+            ClickLoginButton();
+
+            Thread.Sleep(500);
+
+            //4. Sprawdzenie komunikatu walidacyjnego formularza - "Niepoprawne dane logowania"
+            var loginError = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
+            StringAssert.Contains("Niepoprawne dane logowania", loginError.Text);
+
+        }
+
+        [Test]
+        [Category("User login  account tests")]
+        [Author("Maria", "http://maryistesting.com")]
+        [Description("Niepoprawne logowanie na konto użytkownika - logowanie bez uzupełnienia nazwy Chomika")]
+        public void Test1ab()
+        {
+            FillInPasswordSteps("abcde");
+
+            ClickLoginButton();
+
+            Thread.Sleep(500);
+
+            //4. Sprawdzenie komunikatu walidacyjnego formularza - "Podaj nazwę chomika"
+            var emptyLogin = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
+            StringAssert.Contains("Podaj nazwę chomika", emptyLogin.Text);
+        }
+
+        private void FillInLoginSteps(string login)
+        {
+            var loginInput = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
+            loginInput.SendKeys(login);
+        }
+
+        private void ClickLoginButton()
+        {
+            var loginButton = _webDriver.FindElement(By.CssSelector("#topBar_LoginBtn"));
+            loginButton.Click();
+        }
+
+        private void FillInPasswordSteps(string password)
+        {
+            var passwordInput = _webDriver.FindElement(By.CssSelector("#topBarPassword"));
+            passwordInput.SendKeys(password);
         }
     }
 }
