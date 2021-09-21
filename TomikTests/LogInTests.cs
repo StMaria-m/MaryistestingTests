@@ -1,22 +1,27 @@
 ﻿using NUnit.Framework;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using System;
 using System.Threading;
 
 namespace TomikTests
 {
     public class LogInTests : BaseTest
     {
+        private static string _errorMessageContainerSelector = "#loginErrorContent";
+        private static string _displayErrorBlockSelector = "#topBarLoginError[style='display: block;']";
+
         [Test]
-        [Category("User login  account tests")]
+        [Category("User log in tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Poprawne logowanie na konto użytkownika")]
-        public void Test1()
+        public void CorrectLogInTest()
         {
             LogInSteps();
 
             try
             {
-                // Sprawdzenie czy użytkownik jest zalogowany (przycisk wyloguj się pojawił)
+                //sprawdzenie czy użytkownik jest zalogowany (przycisk wyloguj się pojawił)
                 _webDriver.FindElement(By.CssSelector("#logout"));
             }
             catch (OpenQA.Selenium.NoSuchElementException)
@@ -28,59 +33,59 @@ namespace TomikTests
         }
 
         [Test]
-        [Category("User log in account tests")]
+        [Category("User log in tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Sprawdzenie logowania za pomocą adresu e-mail")]
-        public void Test2()
+        public void IncorrectLogInByEmailTest()
         {
             FillInLoginSteps("abcdef@w.ple");
 
             ClickLoginButton();
 
-            Thread.Sleep(300);
+            WaitForAction(_displayErrorBlockSelector);
 
-            //3. Sprawdzenie komunikatu
-            var loginError = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
+            //sprawdzenie komunikatu
+            var loginError = _webDriver.FindElement(By.CssSelector(_errorMessageContainerSelector));
             StringAssert.Contains("Logowanie za pomocą email nie jest dozwolone - użyj nazwy konta", loginError.Text);
         }
 
         [Test]
-        [Category("User log in account tests")]
+        [Category("User log in tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Sprawdzenie logowania bez podania hasła")]
-        public void Test3()
+        public void IncorrectLogIn_noPasswordTest()
         {
             FillInLoginSteps("hgdghjhdsfgjfdgg");
 
             ClickLoginButton();
 
-            Thread.Sleep(300);
+            WaitForAction(_displayErrorBlockSelector);
 
-            //3. Sprawdzam komunikat walidacyjny formularza (jaki?) - "Niepoprawne dane logowania"
-            var loginError = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
+            //sprawdzam komunikat walidacyjny formularza - "Niepoprawne dane logowania"
+            var loginError = _webDriver.FindElement(By.CssSelector(_errorMessageContainerSelector));
             StringAssert.Contains("Niepoprawne dane logowania", loginError.Text);
         }
 
         [Test]
-        [Category("User log in account tests")]
+        [Category("User log in tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Sprawdzenie logowania bez podania danych")]
-        public void Test4()
+        public void IncorrectLogIn_noDataTest()
         {
             ClickLoginButton();
 
-            Thread.Sleep(300);
+            WaitForAction(_displayErrorBlockSelector);
 
-            //2. Sprawdzam komunikat walidacyjny formularza (jaki?) - "Podaj nazwę chomika"
-            var loginError = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
+            //sprawdzam komunikat walidacyjny formularza - "Podaj nazwę chomika"
+            var loginError = _webDriver.FindElement(By.CssSelector(_errorMessageContainerSelector));
             StringAssert.Contains("Podaj nazwę chomika", loginError.Text);
         }
 
         [Test]
-        [Category("User login  account tests")]
+        [Category("User log in tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Niepoprawne logowanie na konto użytkownika -błędny login i hasło")]
-        public void Test1a()
+        public void IncorrectLogIn_tooShortLoginTest()
         {
             FillInLoginSteps("a");
 
@@ -88,25 +93,25 @@ namespace TomikTests
             
             ClickLoginButton();
 
-            Thread.Sleep(500);
+            WaitForAction(_displayErrorBlockSelector);
 
-            //4. Sprawdzenie komunikatu walidacyjnego formularza - "Niepoprawne dane logowania"
-            var loginError = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));
+            //sprawdzenie komunikatu walidacyjnego formularza - "Niepoprawne dane logowania"
+            var loginError = _webDriver.FindElement(By.CssSelector(_errorMessageContainerSelector));
             StringAssert.Contains("Niepoprawne dane logowania", loginError.Text);
 
         }
 
         [Test]
-        [Category("User login  account tests")]
+        [Category("User log in tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Niepoprawne logowanie na konto użytkownika - logowanie bez uzupełnienia nazwy Chomika")]
-        public void Test1ab()
+        public void IncorrectLogIn_noLoginTest()
         {
             FillInPasswordSteps("abcde");
 
             ClickLoginButton();
 
-            Thread.Sleep(500);
+            WaitForAction(_displayErrorBlockSelector);
 
             //4. Sprawdzenie komunikatu walidacyjnego formularza - "Podaj nazwę chomika"
             var emptyLogin = _webDriver.FindElement(By.CssSelector("#loginErrorContent"));

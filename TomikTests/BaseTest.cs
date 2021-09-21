@@ -1,6 +1,9 @@
 ﻿using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using System;
+using System.Linq;
 using System.Threading;
 
 namespace TomikTests
@@ -15,7 +18,7 @@ namespace TomikTests
         {
             _webDriver = new ChromeDriver();
             _webDriver.Manage().Window.Maximize();
-            _webDriver.Url = $"https://chomikuj.pl/{_path}";
+            _webDriver.Url = $"https://xxx.pl/{_path}";
 
         }
 
@@ -35,19 +38,27 @@ namespace TomikTests
         {
             //1. Uzupełnić pole "Chomik"
             var login = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
-            login.SendKeys("nizinka1");
+            login.SendKeys("");
 
             //2. Uzupełnić pole "Hasło"
             var password = _webDriver.FindElement(By.CssSelector("#topBarPassword"));
-            password.SendKeys("123456!@#$%^");
+            password.SendKeys("");
 
             //3. Kliknąć przycisk "Zaloguj"
             var createButton = _webDriver.FindElement(By.CssSelector("#topBar_LoginBtn"));
             createButton.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction("#logout");
 
             RemoveAcceptContainer();
+        }
+
+        public void WaitForAction(string cssSelector)
+        {
+            var wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
+            wait.Until(driver => {
+                return driver.FindElements(By.CssSelector(cssSelector)).Any();
+            });
         }
     }
 }
