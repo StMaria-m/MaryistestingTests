@@ -5,6 +5,7 @@ using OpenQA.Selenium.Support.UI;
 using System;
 using System.Linq;
 using System.Threading;
+using TomikTests.Enums;
 
 namespace TomikTests
 {
@@ -18,7 +19,7 @@ namespace TomikTests
         {
             _webDriver = new ChromeDriver();
             _webDriver.Manage().Window.Maximize();
-            _webDriver.Url = $"https://xxx.pl/{_path}";
+            _webDriver.Url = $"https://.pl/{_path}";
 
         }
 
@@ -53,12 +54,27 @@ namespace TomikTests
             RemoveAcceptContainer();
         }
 
-        public void WaitForAction(string cssSelector)
+        public void WaitForAction(string selector, SearchByTypeEnums selectorType = SearchByTypeEnums.CssSelector)
         {
             var wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
             wait.Until(driver => {
-                return driver.FindElements(By.CssSelector(cssSelector)).Any();
+                var selectorFunction = selectorType == SearchByTypeEnums.CssSelector ? By.CssSelector(selector) : By.XPath(selector);
+
+                var element = driver.FindElements(selectorFunction).FirstOrDefault();
+                if (element == null)
+                {
+                    return false;
+                }
+                return element.Displayed;
             });
+        }
+
+        public void ClickUserAvatarStep()
+        {
+            var userAccount = _webDriver.FindElement(By.CssSelector("#topbarAvatar .friendSmall"));
+            userAccount.Click();
+
+            RemoveAcceptContainer();
         }
     }
 }
