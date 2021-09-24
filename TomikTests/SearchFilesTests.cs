@@ -7,6 +7,11 @@ namespace TomikTests
 {
     public class SearchFilesTests: BaseTest
     {
+        private string _inputFileNameSelector = "#FileName";
+        private string _selectFileTypeSelector = "#FileType";
+        private string _searchButtonSelector = "#Search"; 
+        private string _resultContainerSelector = "#searchFilesView";
+
         public SearchFilesTests()
         {
             _path = "action/SearchFiles";
@@ -16,30 +21,28 @@ namespace TomikTests
         [Category("Search files tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Wyszukiwanie z wyborem z listy rozwijanej")]
-        public void Test1()
+        public void CorrectSearchFilesTest()
         {
             RemoveAcceptContainer();
 
             //1. Uzupełnić pole "Nazwa pliku"
-            var searchingInput = _webDriver.FindElement(By.CssSelector("#FileName"));
+            var searchingInput = _webDriver.FindElement(By.CssSelector(_inputFileNameSelector));
             searchingInput.SendKeys("sapkowski");
 
             //2. Wybrać rodzaj plików z listy rozwijanej
-            var selectOptions = _webDriver.FindElement(By.CssSelector("#FileType"));
+            var selectOptions = _webDriver.FindElement(By.CssSelector(_selectFileTypeSelector));
             new SelectElement(selectOptions).SelectByValue("video");            
 
             //3. Kliknąć w przycisk "Szukaj"           
-            var searchingAvatar = _webDriver.FindElement(By.CssSelector("#Search"));
+            var searchingAvatar = _webDriver.FindElement(By.CssSelector(_searchButtonSelector));
             searchingAvatar.Click();
-
-            Thread.Sleep(1000);
 
             RemoveAcceptContainer();
 
             try
             {
                 //4. Sprawdzenie czy pojawi się galaria wyników wyszukiwania, (jeśli tak, to wyszukiwarka działa poprawnie)
-                _webDriver.FindElement(By.CssSelector("#searchFilesView .filerow"));
+                _webDriver.FindElement(By.CssSelector($"{_resultContainerSelector} .filerow"));
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -54,20 +57,20 @@ namespace TomikTests
         [Category("Search files tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Wyszukiwanie za krótkiej frazy")]
-        public void Test2()
+        public void IncorrectSerachFiles_tooShortFileNameTest()
         {
             RemoveAcceptContainer();
 
             //1. Uzupełnić pole "Nazwa pliku"
-            var searchingInput = _webDriver.FindElement(By.CssSelector("#FileName"));
+            var searchingInput = _webDriver.FindElement(By.CssSelector(_inputFileNameSelector));
             searchingInput.SendKeys("as");
 
             //2. Kliknąć w przycisk "Szukaj"           
-            var searchingAvatar = _webDriver.FindElement(By.CssSelector("#Search"));
+            var searchingAvatar = _webDriver.FindElement(By.CssSelector(_searchButtonSelector));
             searchingAvatar.Click();
 
             //3. Sprawdzenie komunikatu walidacyjnego
-            var loginError = _webDriver.FindElement(By.CssSelector("#searchFilesView div:last-child h1"));
+            var loginError = _webDriver.FindElement(By.CssSelector($"{_resultContainerSelector} div:last-child h1"));
             StringAssert.Contains("Wprowadzone zapytanie jest za krótkie", loginError.Text);
         }      
     }
