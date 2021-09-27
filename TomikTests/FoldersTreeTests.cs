@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using System;
 using System.Threading;
-
 
 namespace TomikTests
 {
@@ -16,9 +16,14 @@ namespace TomikTests
             return $"#TreeContainer > div > table > tbody > tr > td > table > tbody > tr > td > [title='{folderName}']";
         }
 
-        private string getFolderPassSelector()
+        private string getFolderPassSelector(string newFolderName = null)
         {
-            return $"{getFolderSelector()} .pass";
+            return $"{getFolderSelector(newFolderName)} .pass";
+        }
+
+        private string getSelectedFolderSelector(string newFolderName = null)
+        {
+            return $"{getFolderSelector(newFolderName)} .T_selected";
         }
 
         private static string _tooltipContentSelector = "#ui-tooltip-editFolderWindow-content";
@@ -35,7 +40,7 @@ namespace TomikTests
         [Category("Folders tree tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Dodawanie nowego folderu")]
-        public void Test1()
+        public void AddNewFolderTest()
         {
             //Arrange
             //znajdź folder
@@ -60,25 +65,15 @@ namespace TomikTests
             AddNewFolder(_folderName);
 
             //Assert
-            try
-            {
-                //Sprawdzenie czy utworzono nowy folder
-                var newFolderName = _webDriver.FindElement(By.CssSelector(getFolderSelector()));
-            }
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Fail("Folder not found");
-                return;
-            }
-
-            Assert.Pass();
+            //Sprawdzenie czy utworzono nowy folder
+            Assert.DoesNotThrow(() => _webDriver.FindElement(By.CssSelector(getFolderSelector())));           
         }
 
         [Test]
         [Category("Folders tree tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Usuwanie folderu")]
-        public void Test2()
+        public void DeleteFolderTest()
         {
             //Arrange
             _folderName = "folder do usunięcia";
@@ -103,25 +98,15 @@ namespace TomikTests
             DeleteFolder(_folderName);
 
             //Assert
-            try
-            {
-                // Sprawdzenie czy element został usunięty
-                _webDriver.FindElement(By.CssSelector(getFolderSelector()));
-            }
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Pass("Folder is removed");
-                return;
-            }
-
-            Assert.Fail();
+            // Sprawdzenie czy element został usunięty
+            Assert.Throws<NoSuchElementException>(() => _webDriver.FindElement(By.CssSelector(getFolderSelector())));
         }
 
         [Test]
         [Category("Folders tree tests")]
         [Author("Maria", "http://maryistesting.com")]
-        [Description("Dodawanie nowego folderu z niedozwoloną nazwą")]
-        public void Test3()
+        [Description("Próba dodawania nowego folderu z niedozwoloną nazwą")]
+        public void IncorrectAddFolder_wrongFolderNameTest()
         {
             //Arrange
             _folderName = ". ?//";
@@ -135,7 +120,7 @@ namespace TomikTests
             var addFolder = _webDriver.FindElement(By.CssSelector(_addFolderButtonSelector));
             addFolder.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(_tooltipFolderNameInputSelector);
 
             var inputFoldername = _webDriver.FindElement(By.CssSelector(_tooltipFolderNameInputSelector));
             inputFoldername.SendKeys(_folderName);
@@ -143,7 +128,7 @@ namespace TomikTests
             var submitButton = _webDriver.FindElement(By.CssSelector($"{_tooltipContentSelector} input.greenButtonCSS:not(.right)"));
             submitButton.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction($"{_tooltipContentSelector} .errorText b");
 
             //Assert
             //Sprawdzenie, czy pojawi się komunikat "Nazwa nie może zawierać znaków: \ / : * ? " < > |."
@@ -154,8 +139,8 @@ namespace TomikTests
         [Test]
         [Category("Folders tree tests")]
         [Author("Maria", "http://maryistesting.com")]
-        [Description("Zmiana nazwy istniejącego folderu")]
-        public void Test4()
+        [Description("Zmiana nazwy folderu")]
+        public void RenameFolderTest()
         {
             //Arrange
             _folderName = "stara nazwa";
@@ -187,17 +172,17 @@ namespace TomikTests
             }
 
             //Act
-            //znajdź folder
+            //znajdź folder i w niego kliknij
             var fileToRename = _webDriver.FindElement(By.CssSelector(getFolderSelector()));
             fileToRename.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(getSelectedFolderSelector());
 
             //kliknąć przycisk "Nazwa"
             var renameButton = _webDriver.FindElement(By.CssSelector($"{_treeActionButtonsSelector} .treeChangeName"));
             renameButton.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(_tooltipFolderNameInputSelector);
 
             //wpisać nową nazwę
             var inputNewName = _webDriver.FindElement(By.CssSelector(_tooltipFolderNameInputSelector));
@@ -208,29 +193,18 @@ namespace TomikTests
             var sumbitButton = _webDriver.FindElement(By.CssSelector(_tooltipOkButtonSelector));
             sumbitButton.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(getFolderSelector(newFolderName));
 
             //Assert
-            try
-            {
-                //Sprawdzenie czy zmieniono nazwę folderu
-                _webDriver.FindElement(By.CssSelector(getFolderSelector(newFolderName)));
-            }
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Fail("Folder name is not changed");
-                return;
-            }
-
-            Assert.Pass();
-
+            //Sprawdzenie czy zmieniono nazwę folderu
+            Assert.DoesNotThrow(() => _webDriver.FindElement(By.CssSelector(getFolderSelector(newFolderName))));
         }
 
         [Test]
         [Category("Folders tree tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Ustawienie hasła dostępu do folderu")]
-        public void Test5()
+        public void SetAccessPasswordTest()
         {
             //Arrange            
             LogInSteps();
@@ -256,7 +230,7 @@ namespace TomikTests
                 var passwordButton = _webDriver.FindElement(By.CssSelector(_passwordButtonSelector));
                 passwordButton.Click();
 
-                Thread.Sleep(1000);
+                WaitForAction(getSelectedFolderSelector());
 
                 var removePassword = _webDriver.FindElement(By.CssSelector(_tooltipRemovePasswordButtonSelector));
                 removePassword.Click();
@@ -269,16 +243,17 @@ namespace TomikTests
             }
 
             //Act
+            //znajdź i kliknij folder do usuniecia
             var currentFolder = _webDriver.FindElement(By.CssSelector(getFolderSelector()));
             currentFolder.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(getSelectedFolderSelector());
 
             //kliknąć przycisk "Hasło"
             var passwordButton1 = _webDriver.FindElement(By.CssSelector(_passwordButtonSelector));
             passwordButton1.Click();
 
-            Thread.Sleep(3000);
+            WaitForAction("#Password");
 
             //wpisać hasło
             var inputFolder1Password = _webDriver.FindElement(By.CssSelector("#Password"));
@@ -288,31 +263,19 @@ namespace TomikTests
             var confirmButton = _webDriver.FindElement(By.CssSelector(_tooltipOkButtonSelector));
             confirmButton.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(getFolderPassSelector());
 
             //Assert
-            try
-            {
-                //sprawdzenie dodania hasła - czy obok folderu pojawia się symbol kłódki
-                _webDriver.FindElement(By.CssSelector(getFolderPassSelector()));
-            }
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Fail("Password doesn't exist");
-                return;
-            }
-
-            Assert.Pass();
+            //sprawdzenie dodania hasła - czy obok folderu pojawia się symbol kłódki
+            Assert.DoesNotThrow(() => _webDriver.FindElement(By.CssSelector(getFolderPassSelector())));
         }
 
         [Test]
         [Category("Folders tree tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Usunięcie hasła dostępu do folderu")]
-        public void Test6()
+        public void DeleteAccessPasswordTest()
         {
-
-
             LogInSteps();
 
             ClickUserAvatarStep();
@@ -332,7 +295,7 @@ namespace TomikTests
             var currentFolder = _webDriver.FindElement(By.CssSelector(getFolderSelector()));
             currentFolder.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(getSelectedFolderSelector());
 
             try
             {
@@ -345,7 +308,7 @@ namespace TomikTests
                 var passwordButton2 = _webDriver.FindElement(By.CssSelector(_passwordButtonSelector));
                 passwordButton2.Click();
 
-                Thread.Sleep(3000);
+                WaitForAction("#Password");
 
                 //wpisać hasło
                 var inputFolder1Password = _webDriver.FindElement(By.CssSelector("#Password"));
@@ -355,7 +318,7 @@ namespace TomikTests
                 var confirmButton = _webDriver.FindElement(By.CssSelector(_tooltipOkButtonSelector));
                 confirmButton.Click();
 
-                Thread.Sleep(1000);
+                WaitForAction(getFolderPassSelector());//nie wiem co tu czeka?
             }
 
             //Act
@@ -363,7 +326,7 @@ namespace TomikTests
             var passwordButton1 = _webDriver.FindElement(By.CssSelector(_passwordButtonSelector));
             passwordButton1.Click();
 
-            Thread.Sleep(3000);
+            WaitForAction(_tooltipRemovePasswordButtonSelector);
 
             //kliknąć symbol usuwania hasła
             var removePassword = _webDriver.FindElement(By.CssSelector(_tooltipRemovePasswordButtonSelector));
@@ -372,26 +335,15 @@ namespace TomikTests
             Thread.Sleep(1000);
 
             //Assert
-            try
-            {
-                //sprawdzenie czy jest symbol kłódki obok folderu, jeśli nie hasło usunięto
-                _webDriver.FindElement(By.CssSelector(getFolderPassSelector()));
-            }
-
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Pass("Password is removed");
-                return;
-            }
-
-            Assert.Fail("Password is not removed");
+            //sprawdzenie czy jest symbol kłódki obok folderu, jeśli nie hasło usunięto
+            Assert.Throws<NoSuchElementException>(() => _webDriver.FindElement(By.CssSelector(getFolderPassSelector())));
         }
 
         [Test]
         [Category("Folders tree tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Dodanie folderu o takiej samej nazwie w tej samej lokalizacji")]
-        public void Test5555()
+        public void IncorrectAddFolder_doubleFolderNameTest()
         {
             //Arrange
             LogInSteps();
@@ -412,18 +364,19 @@ namespace TomikTests
             //dodać taki sam folder
             AddNewFolder(_folderName);
 
+            Thread.Sleep(1000);
+
             //Assert
             //sprawdzić komunikat walidacyjny "Folder o tej nazwie już istnieje."
             var errorText = _webDriver.FindElement(By.CssSelector($"{_tooltipContentSelector} .errorText"));
             StringAssert.Contains("Folder o tej nazwie już istnieje.", errorText.Text);
-
         }
 
         [Test]
         [Category("Folders tree tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Zmiana nazwy folderu tak by utworzyć dubla istniejącej już nazwy innego folderu - weryfikacja komunikatu walidacyjnego")]
-        public void Test666()
+        public void IncorrectRenameFolder_doubleFolderNameTest()
         {
             //Arrange
             _folderName = "identyczny";
@@ -461,13 +414,15 @@ namespace TomikTests
             var anotherFolder = _webDriver.FindElement(By.CssSelector(getFolderSelector(doubleFolderName)));
             anotherFolder.Click();
 
-            Thread.Sleep(1000);
+            //czeka na zaznaczenie folderu
+            WaitForAction(getSelectedFolderSelector(doubleFolderName));
+
 
             //kliknąć przycisk "Nazwa"
             var renameButton = _webDriver.FindElement(By.CssSelector($"{_treeActionButtonsSelector} .treeChangeName"));
             renameButton.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(_tooltipFolderNameInputSelector);
 
             //wpisać nową nazwę
             var inputNewName = _webDriver.FindElement(By.CssSelector(_tooltipFolderNameInputSelector));
@@ -485,20 +440,12 @@ namespace TomikTests
             StringAssert.Contains("Folder o tej nazwie już istnieje.", errorText.Text);
         }
 
-        private void ClickUserAvatarStep()
-        {
-            var userAccount = _webDriver.FindElement(By.CssSelector("#topbarAvatar .friendSmall"));
-            userAccount.Click();
-
-            RemoveAcceptContainer();
-        }
-
         private void AddNewFolder(string newFolderName)
         {
             var addSameFolder = _webDriver.FindElement(By.CssSelector($"{_addFolderButtonSelector}"));
             addSameFolder.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(_tooltipFolderNameInputSelector);
 
             var inputFolderName = _webDriver.FindElement(By.CssSelector(_tooltipFolderNameInputSelector));
             inputFolderName.SendKeys(newFolderName);
@@ -506,25 +453,32 @@ namespace TomikTests
             var OKbutton = _webDriver.FindElement(By.CssSelector($"{_tooltipOkButtonSelector}"));
             OKbutton.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(getFolderSelector(newFolderName));
         }
 
         private void DeleteFolder(string folderName)
         {
-            var renamedFile = _webDriver.FindElement(By.CssSelector(getFolderSelector(folderName)));
-            renamedFile.Click();
+            string allFoldersSelector = $"#TreeContainer > div > table > tbody > tr > td > table > tbody > tr";
+            var allFoldersElements = _webDriver.FindElements(By.CssSelector(allFoldersSelector));
 
-            Thread.Sleep(1000);
+            var fileToRmove = _webDriver.FindElement(By.CssSelector(getFolderSelector(folderName)));
+            fileToRmove.Click();
+
+            WaitForAction(getSelectedFolderSelector(folderName));
 
             var deleteButton = _webDriver.FindElement(By.CssSelector(_deleteButtonSelector));
             deleteButton.Click();
 
-            Thread.Sleep(1000);
+            WaitForAction(_tooltipContentSelector);
 
             var submitButton = _webDriver.FindElement(By.CssSelector($"{_tooltipContentSelector} input.greenButtonCSS.left"));
             submitButton.Click();
 
-            Thread.Sleep(1000);
+            var wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
+            wait.Until(webDriver => {
+                var elementsAfter = webDriver.FindElements(By.CssSelector(allFoldersSelector));
+                return elementsAfter.Count < allFoldersElements.Count;
+            });
         }
     }
 }
