@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OliksTests", "OliksTests\Ol
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyExampleTests", "MyExampleTests\MyExampleTests.csproj", "{C01F02AF-204C-48D1-978D-CA169CE9CBD9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrenditTests", "TrenditTests\TrenditTests.csproj", "{A5A2D674-7483-4089-95AF-03FE99C9EAE9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{C01F02AF-204C-48D1-978D-CA169CE9CBD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C01F02AF-204C-48D1-978D-CA169CE9CBD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C01F02AF-204C-48D1-978D-CA169CE9CBD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5A2D674-7483-4089-95AF-03FE99C9EAE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5A2D674-7483-4089-95AF-03FE99C9EAE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5A2D674-7483-4089-95AF-03FE99C9EAE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5A2D674-7483-4089-95AF-03FE99C9EAE9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
