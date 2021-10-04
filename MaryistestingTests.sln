@@ -11,6 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyExampleTests", "MyExample
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TrenditTests", "TrenditTests\TrenditTests.csproj", "{A5A2D674-7483-4089-95AF-03FE99C9EAE9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E6AFBC12-D165-42EA-9ACC-50D5B400ECDD}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JokeApiTests", "JokeApiTests\JokeApiTests.csproj", "{8ACB1F52-FAAA-47F0-8CE3-A66C93D700C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +40,10 @@ Global
 		{A5A2D674-7483-4089-95AF-03FE99C9EAE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5A2D674-7483-4089-95AF-03FE99C9EAE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5A2D674-7483-4089-95AF-03FE99C9EAE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ACB1F52-FAAA-47F0-8CE3-A66C93D700C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ACB1F52-FAAA-47F0-8CE3-A66C93D700C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ACB1F52-FAAA-47F0-8CE3-A66C93D700C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ACB1F52-FAAA-47F0-8CE3-A66C93D700C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
