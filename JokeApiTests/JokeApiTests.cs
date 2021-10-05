@@ -88,5 +88,74 @@ namespace JokeApiTests
 
             StringAssert.Contains("twopart", responseJoke.Type);
         }
+        
+        [Test]
+        [Description("Check if api eliminates jokes signed as blacklist: nsfw, religious, racist, sexist, explicit")]
+        public void CorrectRequest_return_jokeWithoutBlacklistTest()
+        {            
+            RestRequest restRequest = new RestRequest("joke/Any?blacklistFlags=nsfw,religious,racist,sexist,explicit", Method.GET);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
+
+            Assert.IsTrue(responseJoke.Flags.Nsfw == false 
+                && responseJoke.Flags.Religious == false 
+                && responseJoke.Flags.Racist == false 
+                && responseJoke.Flags.Sexist == false 
+                && responseJoke.Flags.Explicit == false);
+        }
+
+        [Test]
+        [Description("Check if api returns jokes contains demanded string")]
+        public void CorrectRequest_return_jokeContainsDemandedStringTest()
+        {
+         
+            RestRequest restRequest = new RestRequest("joke/Any?type=single&contains=man", Method.GET);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
+
+            StringAssert.Contains("man", responseJoke.Joke);
+
+            StringAssert.Contains("single", responseJoke.Type);
+        }
+
+        [Test]
+        [Description("Add new joke")]
+        public void CorrectRequest_add_newJokeTest()
+        {
+            NewJokeRequest newJoke = new NewJokeRequest
+            {
+                Category = "Dark",
+                FormatVersion = 3,
+                Joke = "ioijioio",
+                Lang = "en",
+                Type = "single",
+                Flags = new Flags
+                {
+                    Explicit = false,
+                    Nsfw = false,
+                    Political = true,
+                    Racist = false,
+                    Religious = false,
+                    Sexist = false
+                }
+            };
+
+            var payload = JsonConvert.SerializeObject(newJoke);
+
+            RestRequest restRequest = new RestRequest("submit", Method.PUT);
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+        }
     }
 }
