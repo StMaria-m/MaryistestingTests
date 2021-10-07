@@ -46,8 +46,6 @@ namespace TrenditTests
 
         public void WaitForElementDisappeared(string selector, SearchByTypeEnums selectorType = SearchByTypeEnums.CssSelector)
         {
-            _webDriver.FindElement(By.CssSelector(".swal2-confirm.swal2-styled")).Click();
-
             var wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
             wait.Until(driver => {
                 try
@@ -95,7 +93,7 @@ namespace TrenditTests
         }
 
         public void FindAndSendKeys(string selector, string text, SearchByTypeEnums selectorType = SearchByTypeEnums.CssSelector)
-        {           
+        {
             By selectorFunction = selectorType == SearchByTypeEnums.CssSelector ? By.CssSelector(selector) : By.XPath(selector);
             var input = _webDriver.FindElement(selectorFunction);
             input.Clear();
