@@ -227,5 +227,182 @@ namespace TrenditTests
             var newAdress = _webDriver.FindElements(By.XPath(GetRowXPathSelector()));
             Assert.IsTrue(newAdress.Count == 1);
         }
+
+        [Test]
+        [Description("Usunięcie adresu z książki adresowej")]
+        public void RemoveAdressTest()
+        {
+            LogInUserAccount();
+
+            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+
+            //sprawdzić czy  w książce adresowej istnieje adres, który chcemy usunąć
+            try
+            {
+                _webDriver.FindElement(By.XPath(GetRowXPathSelector()));
+            }
+            catch
+            {
+                //jeśli nie ma, to dodać
+                //kliknąć przycisk "Dodaj adres"
+                FindAndClick(_addButtonSelector);
+
+                WaitForElementDisplayed(_addressFormSelector);
+
+                //uzupełnić pole "Nazwa własna"
+                FindAndSendKeys(_adressInputNameSelector, _adressName);
+
+                //kliknąć przycisk "Dodaj adres"
+                FindAndClick(_submitButtonSelector);
+
+                WaitForElementDisplayed(GetRowXPathSelector(), SearchByTypeEnums.XPath);
+            }
+
+            //znaleźć adres i kliknąć przycisk "Edytuj"
+            var rowElement = _webDriver.FindElement(By.XPath(GetRowXPathSelector()));
+            rowElement.FindElement(By.CssSelector(_rowEditButtonSelector))
+                .Click();
+
+            //kliknąć przycisk "Usuń adres"
+            FindAndClick("[onclick='AddressBook.instance().removeConfirm();']");
+
+            WaitForElementDisplayed(_actionConfirmPopUp);
+
+            FindAndClick(".swal2-confirm.swal2-styled");
+
+
+            WaitForElementDisappeared(_actionConfirmPopUp);
+
+            //sprawdzenie czy adres został usunięty
+            Assert.Throws<NoSuchElementException>(() => _webDriver.FindElement(By.XPath(GetRowXPathSelector())));
+        }
+
+        [Test]
+        [Description("Wyszukiwanie adresu w książce adresowej we wszystkich typach adresów")]
+        public void FindAdressInAdressBookTest()
+        {
+            LogInUserAccount();
+
+            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+
+            try
+            {
+                //sprawdzić, czy w książce adresowej istnieje wyszukiwany adres
+                _webDriver.FindElement(By.XPath(GetRowXPathSelector()));
+            }
+            catch
+            {
+                //jeśli nie ma, to trzeba dodać
+                //kliknąć przycisk "Dodaj adres"
+                FindAndClick(_addButtonSelector);
+
+                WaitForElementDisplayed(_addressFormSelector);
+
+                //uzupełnić pole "Nazwa własna"
+                FindAndSendKeys(_adressInputNameSelector, _adressName);
+
+                //kliknąć przycisk "Dodaj adres"
+                FindAndClick(_submitButtonSelector);
+
+                WaitForElementDisplayed(GetRowXPathSelector(), SearchByTypeEnums.XPath);
+            }
+
+            //uzupełnić pole "Szukaj..."
+            FindAndClick("[for=searchAny]");
+            FindAndSendKeys("[name=searchQuery]", _adressName);
+
+            //kliknąć w sekcję body (brak przycisku "Wyszukaj")
+            FindAndClick("body");
+
+            //sprawdzić, czy w wynikach wyszukiwania pojawił się wyszukiwany adres
+            Assert.DoesNotThrow(() => _webDriver.FindElement(By.XPath(GetRowXPathSelector())));
+        }
+
+        [Test]
+        [Description("Edycja istniejącego adresu - zmiana nazwy")]
+        public void UpdateAdress_changeAdressNameTest()
+        {
+            string newAdressName = "nowa nazwa adresu";
+            LogInUserAccount();
+
+            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+
+            try
+            {
+                //sprawdzić, czy w książce adresowej istnieje wyszukiwany adres
+                _webDriver.FindElement(By.XPath(GetRowXPathSelector()));
+            }
+            catch
+            {
+                //jeśli nie ma, to trzeba dodać
+                //kliknąć przycisk "Dodaj adres"
+                FindAndClick(_addButtonSelector);
+
+                WaitForElementDisplayed(_addressFormSelector);
+
+                //uzupełnić pole "Nazwa własna"
+                FindAndSendKeys(_adressInputNameSelector, _adressName);
+
+                //kliknąć przycisk "Dodaj adres"
+                FindAndClick(_submitButtonSelector);
+
+                WaitForElementDisplayed(GetRowXPathSelector(), SearchByTypeEnums.XPath);
+            }
+
+            //sprawdzić, czy w książce adresowej istnieje adres o nazwie docelowej
+            //znaleźć adres i kliknąć przycisk "Edytuj" i wypierdolić (usunąć)            
+            try
+            {
+                var rowElement2 = _webDriver.FindElement(By.XPath(GetRowXPathSelector(newAdressName)));
+                rowElement2.FindElement(By.CssSelector(_rowEditButtonSelector))
+                    .Click();
+
+                //kliknąć przycisk "Usuń adres"
+                FindAndClick("[onclick='AddressBook.instance().removeConfirm();']");
+
+                WaitForElementDisplayed(_actionConfirmPopUp);
+
+                FindAndClick(".swal2-confirm.swal2-styled");
+
+
+                WaitForElementDisappeared(_actionConfirmPopUp);
+            }
+            catch
+            {
+                //nic nie rób, nie ma takiego adresu 
+            }
+
+            //kliknąć przycisk "Edytuj"
+            var rowElement = _webDriver.FindElement(By.XPath(GetRowXPathSelector()));
+            rowElement.FindElement(By.CssSelector(_rowEditButtonSelector))
+                .Click();
+
+            WaitForElementDisplayed(_addressFormSelector);
+
+            var beforeAddressName = _webDriver.FindElement(By.CssSelector(_adressInputNameSelector)).GetAttribute("value");
+
+            //uzupełnić pole "Nazwa własna"
+            var newNameAdress = _webDriver.FindElement(By.CssSelector(_adressInputNameSelector));
+            newNameAdress.Clear();
+            newNameAdress.SendKeys(newAdressName);
+
+            //klikąć "Zapisz zmiany"
+            FindAndClick(_submitButtonSelector);
+
+            WaitForElementDisappeared(_actionConfirmPopUp);
+
+            ////sprawdzić, czy nazwa adresu została zmieniona
+            ////znaleźć dodany adres i kliknąć przycysk "Edytuj"
+            rowElement = _webDriver.FindElement(By.XPath(GetRowXPathSelector(newAdressName)));
+            rowElement.FindElement(By.CssSelector(_rowEditButtonSelector))
+                .Click();
+
+            WaitForElementDisplayed(_addressFormSelector);
+
+            string afterAddressName = _webDriver.FindElement(By.CssSelector(_adressInputNameSelector)).GetAttribute("value");
+
+            //sprawdzić, czy nazwa adresu została zmieniona
+            StringAssert.DoesNotStartWith(afterAddressName, beforeAddressName);
+        }        
     }
 }
