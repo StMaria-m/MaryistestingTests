@@ -22,6 +22,8 @@ namespace TrenditTests
         private string _actionConfirmPopUp = ".swal2-header";
         private string _adressInputNameSelector = "[name=alias]";
 
+        private string _url = "https://panel.sendit.pl/ksiazka-adresowa";
+
         private string GetRowXPathSelector(string newAdressName = null)
         {
             string adressName = string.IsNullOrEmpty(newAdressName) ? _adressName : newAdressName;
@@ -45,7 +47,7 @@ namespace TrenditTests
         {
             LogInUserAccount();
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+            _webDriver.Navigate().GoToUrl(_url);
 
             //sprawdzić, czy w książce adresów istnieje adres o nazwie, którą chcemy dodać
             try
@@ -88,7 +90,7 @@ namespace TrenditTests
         {
             LogInUserAccount();
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+            _webDriver.Navigate().GoToUrl(_url);
 
             //sprawdzić czy  w książce adresowej jest już adres o nazwie, jaką chcemy dodać
             try
@@ -157,7 +159,7 @@ namespace TrenditTests
         {
             LogInUserAccount();
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+            _webDriver.Navigate().GoToUrl(_url);
 
             //sprawdzić czy  w książce adresowej jest już adres o nazwie, jaką chcemy dodać
             try
@@ -234,7 +236,7 @@ namespace TrenditTests
         {
             LogInUserAccount();
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+            _webDriver.Navigate().GoToUrl(_url);
 
             //sprawdzić czy  w książce adresowej istnieje adres, który chcemy usunąć
             try
@@ -283,7 +285,7 @@ namespace TrenditTests
         {
             LogInUserAccount();
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+            _webDriver.Navigate().GoToUrl(_url);
 
             try
             {
@@ -325,7 +327,7 @@ namespace TrenditTests
             string newAdressName = "nowa nazwa adresu";
             LogInUserAccount();
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ksiazka-adresowa");
+            _webDriver.Navigate().GoToUrl(_url);
 
             try
             {
@@ -403,6 +405,112 @@ namespace TrenditTests
 
             //sprawdzić, czy nazwa adresu została zmieniona
             StringAssert.DoesNotStartWith(afterAddressName, beforeAddressName);
-        }        
+        }
+
+        [Test]
+        [Description("Edycja istniejącego adresu - zmiana typu adresu")]
+        public void UpdateAdress_changeAdressTypeInAdressBookTest()
+        {
+            LogInUserAccount();
+
+            _webDriver.Navigate().GoToUrl(_url);
+
+            try
+            {
+                //sprawdzić, czy w książce adresowej istnieje wyszukiwany adres
+                _webDriver.FindElement(By.XPath(GetRowXPathSelector()));
+            }
+            catch
+            {
+                //jeśli nie ma, to trzeba dodać
+                //kliknąć przycisk "Dodaj adres"
+                FindAndClick(_addButtonSelector);
+
+                WaitForElementDisplayed(_addressFormSelector);
+
+                //uzupełnić pole "Nazwa własna"
+                FindAndSendKeys(_adressInputNameSelector, _adressName);
+
+                //kliknąć przycisk "Dodaj adres"
+                FindAndClick(_submitButtonSelector);
+
+                WaitForElementDisplayed(GetRowXPathSelector(), SearchByTypeEnums.XPath);
+            }
+
+            //kliknąć przycisk "Edytuj"
+            var rowElement = _webDriver.FindElement(By.XPath(GetRowXPathSelector()));
+            rowElement.FindElement(By.CssSelector(_rowEditButtonSelector))
+                .Click();
+
+            WaitForElementDisplayed(_addressFormSelector);
+
+            //sprawdzić czy zaznaczono checkbox "Adres nadania"
+            bool beforeShippmentAddressCheckboxSelected = _webDriver.FindElement(By.CssSelector("#formItemSender"))
+                .Selected;
+            bool beforeDeliveryAddressCheckboxSelected = _webDriver.FindElement(By.CssSelector("#formItemReceiver"))
+                .Selected;
+
+            if (beforeShippmentAddressCheckboxSelected && beforeDeliveryAddressCheckboxSelected)
+            {
+                FindAndClick("[for=formItemSender]");
+            }
+            else
+            {
+                if (beforeShippmentAddressCheckboxSelected == false)
+                {
+                    FindAndClick("[for=formItemSender]");
+                }
+                else if (beforeDeliveryAddressCheckboxSelected == false)
+                {
+                    FindAndClick("[for=formItemReceiver]");
+                }
+            }
+
+            //kliknąć przycisk "Zapisz zmiany"
+            FindAndClick(_submitButtonSelector);
+
+            Thread.Sleep(1000);
+
+            //sprawdzić, czy typ adresu został zmieniony
+            //znaleźć dodany adres i kliknąć przycysk "Edytuj"
+            var rowElement1 = _webDriver.FindElement(By.XPath(GetRowXPathSelector()));
+            rowElement1.FindElement(By.CssSelector(_rowEditButtonSelector))
+                .Click();
+
+            //sprawdzenie czy zmieniono typ adresu - czy dodany adres jest adresem nadania i dostawy
+            var afterShippmentAddressCheckboxSelected = _webDriver.FindElement(By.CssSelector("#formItemSender"))
+                .Selected;
+            var afterDeliveryAddressCheckboxSelected = _webDriver.FindElement(By.CssSelector("#formItemReceiver"))
+                .Selected;
+
+            Assert.IsTrue(afterShippmentAddressCheckboxSelected != beforeShippmentAddressCheckboxSelected
+                || afterDeliveryAddressCheckboxSelected != beforeDeliveryAddressCheckboxSelected);
+        }   
+
+        [Test]
+        [Description("Dodanie opinii o stronie")]
+        public void AddOpinionAboutSiteTest()
+        {
+            LogInUserAccount();
+
+            //kliknąć element "Opinia" po prawej stronie ekranu
+            FindAndClick("._hj-21t0-__MinimizedWidgetMiddle__label");
+
+            //czekać na wyświetlenie okienka do wyrażania opinii
+            WaitForElementDisplayed("._hj-3PSb0__ExpandedWidget__innerContainer");
+
+            //kliknąć wybrany element - Dobrze
+            FindAndClick("._hj-2oMDA__EmotionOption__like");
+
+            //uzupełnić input "Podziel się z nami swoją opinią"
+            FindAndSendKeys("._hj-2bByr__EmotionComment__textArea._hj-FAirH__styles__inputField", "OK");
+
+            //kliknij przycisk "Wyślij"
+            FindAndClick("._hj-qnMJa__styles__primaryButton._hj-2wZPy__PrimaryButtonBase__primaryButton");
+
+            //sprwdzić czy wyświetlono potwierdzenie wysłania opinii
+            var confirmWindow = _webDriver.FindElement(By.CssSelector("._hj-2ObUs__MinimizedWidgetMessage__messageText"));
+            Assert.IsTrue(confirmWindow.Displayed);
+        }
     }
 }
