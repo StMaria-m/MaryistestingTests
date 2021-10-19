@@ -61,7 +61,7 @@ namespace TrenditTests
             GoToLoginPage();
 
             //uzupełnić Login
-            _webDriver.FindElement(By.CssSelector(loginSelector)).SendKeys(loginInput);
+            _webDriver.FindElement(By.CssSelector(loginSelector)).SendKeys(_appSettings.Login);
 
             //kliknąć przycisk "Zaloguj się"
             _webDriver.FindElement(By.CssSelector(submitButton)).Click();
@@ -86,6 +86,6 @@ namespace TrenditTests
             Assert.IsTrue(logOutButton.Count > 0);
         }
 
-        private void GoToLoginPage() => _webDriver.Navigate().GoToUrl($"https://panel.xxx.pl/logowanie");
+        private void GoToLoginPage() => _webDriver.Navigate().GoToUrl(_appSettings.LoginFormUrl);
     }
 }

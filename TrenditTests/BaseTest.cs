@@ -1,12 +1,15 @@
-﻿using NUnit.Framework;
+﻿using Newtonsoft.Json;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using TrenditTests.Enums;
+using TrenditTests.Models;
 
 namespace TrenditTests
 {
@@ -14,13 +17,20 @@ namespace TrenditTests
     {
         protected IWebDriver _webDriver;
         protected string _path;
+        protected AppSettingsModel _appSettings;
+
+        public BaseTest()
+        {
+            var appSettingsString = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}//appsettings.json");
+            _appSettings = JsonConvert.DeserializeObject<AppSettingsModel>(appSettingsString);
+        }
 
         [SetUp]
         public void Open()
         {
             _webDriver = new ChromeDriver();
             _webDriver.Manage().Window.Maximize();
-            _webDriver.Url = $"https://www.xxx.pl/{_path}";
+            _webDriver.Url = $"{_appSettings.BaseUrl}/{_path}";
         }
 
         [TearDown]
@@ -64,19 +74,17 @@ namespace TrenditTests
 
         public void LogInUserAccount()
         {
-            //kliknąć przycisk Zaloguj
-            var logInButton = _webDriver.FindElement(By.CssSelector("a[href='https://panel.xxx.pl']"));
-            logInButton.Click();
+            _webDriver.Navigate().GoToUrl(_appSettings.LoginFormUrl);
 
             WaitForElementDisplayed("[name=login]");
 
             //uzupełnić Login
             var loginInput = _webDriver.FindElement(By.CssSelector("[name=login]"));
-            loginInput.SendKeys("");
+            loginInput.SendKeys(_appSettings.Login);
 
             //uzupłnić hasło
             var passwordInput = _webDriver.FindElement(By.CssSelector("[name=password]"));
-            passwordInput.SendKeys("");
+            passwordInput.SendKeys(_appSettings.Password);
 
             //kliknąć przycisk "Zaloguj się"
             var registrationButton = _webDriver.FindElement(By.CssSelector("[type=submit].button100"));
