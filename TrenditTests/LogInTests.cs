@@ -9,7 +9,6 @@ namespace TrenditTests
         string loginSelector = "[name=login]";
         string wrongLoginInput = "mtest@vp.pl";
         string errorMessageSelector = "#formLogin span.error";
-        string loginInput = "";
         string passwordSelector = "[name=password]";
 
         [Test]

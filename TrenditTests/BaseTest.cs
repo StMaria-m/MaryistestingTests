@@ -82,7 +82,7 @@ namespace TrenditTests
             var loginInput = _webDriver.FindElement(By.CssSelector("[name=login]"));
             loginInput.SendKeys(_appSettings.Login);
 
-            //uzupłnić hasło
+            //uzupełnić hasło
             var passwordInput = _webDriver.FindElement(By.CssSelector("[name=password]"));
             passwordInput.SendKeys(_appSettings.Password);
 
