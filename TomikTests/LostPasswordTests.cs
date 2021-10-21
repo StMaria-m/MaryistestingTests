@@ -19,25 +19,19 @@ namespace TomikTests
         {
             RemoveAcceptContainer();
 
-            //1. Uzupełnić pole "Chomik"
-            var login = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
-            login.SendKeys("");
-
-            Thread.Sleep(300);
-
-            //2. Kliknąć w przycisk "zapomniałem"
+            //1. Kliknąć w przycisk "zapomniałem"
             var loginButton = _webDriver.FindElement(By.CssSelector(".forgotPass"));
             loginButton.Click();
 
             Thread.Sleep(300);
 
-            //3.Uzupełnić e-mail, na który ma być wysłane przypomnienie hasła
+            //2.Uzupełnić e-mail, na który ma być wysłane przypomnienie hasła
             var useremail = _webDriver.FindElement(By.CssSelector("#ctl00_CT_txtEmailAddress"));
-            useremail.SendKeys("**** wpisz tutaj swój login ****");
+            useremail.SendKeys(_appSettings.Login);
 
             try
             {
-                //4. Sprawdzenie czy pojawi się Captcha (jeśli tak, to można przyjąć, że link resetujący hasło został wysłany)
+                //3. Sprawdzenie czy pojawi się Captcha (jeśli tak, to można przyjąć, że link resetujący hasło został wysłany)
                 _webDriver.FindElement(By.CssSelector("#ctl00_CT_CaptchaEntered"));
             }
             catch (OpenQA.Selenium.NoSuchElementException)

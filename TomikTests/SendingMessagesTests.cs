@@ -79,8 +79,6 @@ namespace TomikTests
             Assert.Pass();
         }
 
-
-
         private void SearchUserByFullName(string userName)
         {
             //zaznaczyć radio button wyszukiwanie chomików i wpisać pełną unikatową nazwę chomika
@@ -168,7 +166,6 @@ namespace TomikTests
                 return;
             }
             Assert.Pass();
-
         }
     }
 }

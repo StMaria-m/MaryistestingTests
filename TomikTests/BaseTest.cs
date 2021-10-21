@@ -1,11 +1,13 @@
-﻿using NUnit.Framework;
+﻿using Newtonsoft.Json;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.IO;
 using System.Linq;
-using System.Threading;
 using TomikTests.Enums;
+using TomikTests.Models;
 
 namespace TomikTests
 {
@@ -13,13 +15,21 @@ namespace TomikTests
     {
         protected IWebDriver _webDriver;
         protected string _path;
+        protected AppSettingsModel _appSettings;
+
+        [OneTimeSetUp]
+        public void PrepareData()
+        {
+            var appSettingsString = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}//appsettings.json");
+            _appSettings = JsonConvert.DeserializeObject<AppSettingsModel>(appSettingsString);
+        }
 
         [SetUp]
         public void Open()
         {
             _webDriver = new ChromeDriver();
             _webDriver.Manage().Window.Maximize();
-            _webDriver.Url = $"https://.pl/{_path}";
+            _webDriver.Url = $"{_appSettings.BaseUrl}/{_path}";
 
         }
 
@@ -39,11 +49,11 @@ namespace TomikTests
         {
             //1. Uzupełnić pole "Chomik"
             var login = _webDriver.FindElement(By.CssSelector("#topBarLogin"));
-            login.SendKeys("");
+            login.SendKeys(_appSettings.Login);
 
             //2. Uzupełnić pole "Hasło"
             var password = _webDriver.FindElement(By.CssSelector("#topBarPassword"));
-            password.SendKeys("");
+            password.SendKeys(_appSettings.Password);
 
             //3. Kliknąć przycisk "Zaloguj"
             var createButton = _webDriver.FindElement(By.CssSelector("#topBar_LoginBtn"));
