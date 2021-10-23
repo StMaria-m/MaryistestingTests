@@ -85,6 +85,6 @@ namespace TrenditTests
             Assert.IsTrue(logOutButton.Count > 0);
         }
 
-        private void GoToLoginPage() => _webDriver.Navigate().GoToUrl(_appSettings.LoginFormUrl);
+        private void GoToLoginPage() => _webDriver.Navigate().GoToUrl($"{_appSettings.UserPanelUrl}/logowanie");
     }
 }

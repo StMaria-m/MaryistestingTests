@@ -19,7 +19,8 @@ namespace TrenditTests
         protected string _path;
         protected AppSettingsModel _appSettings;
 
-        public BaseTest()
+        [OneTimeSetUp]
+        public void PrepareData()
         {
             var appSettingsString = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}//appsettings.json");
             _appSettings = JsonConvert.DeserializeObject<AppSettingsModel>(appSettingsString);
@@ -42,7 +43,8 @@ namespace TrenditTests
         public void WaitForElementDisplayed(string selector, SearchByTypeEnums selectorType = SearchByTypeEnums.CssSelector)
         {
             var wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
-            wait.Until(driver => {
+            wait.Until(driver =>
+            {
                 var selectorFunction = selectorType == SearchByTypeEnums.CssSelector ? By.CssSelector(selector) : By.XPath(selector);
 
                 var element = driver.FindElements(selectorFunction).FirstOrDefault();
@@ -57,7 +59,8 @@ namespace TrenditTests
         public void WaitForElementDisappeared(string selector, SearchByTypeEnums selectorType = SearchByTypeEnums.CssSelector)
         {
             var wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
-            wait.Until(driver => {
+            wait.Until(driver =>
+            {
                 try
                 {
                     var selectorFunction = selectorType == SearchByTypeEnums.CssSelector ? By.CssSelector(selector) : By.XPath(selector);
@@ -74,7 +77,7 @@ namespace TrenditTests
 
         public void LogInUserAccount()
         {
-            _webDriver.Navigate().GoToUrl(_appSettings.LoginFormUrl);
+            _webDriver.Navigate().GoToUrl($"{_appSettings.UserPanelUrl}/logowanie");
 
             WaitForElementDisplayed("[name=login]");
 

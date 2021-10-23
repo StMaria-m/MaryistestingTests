@@ -7,7 +7,7 @@ namespace TrenditTests
 {
     [Author("Maria", "http://maryistesting.com")]
     [Category("Update user details")]
-    public class UserOptionsTests : BaseTest
+    public class UserOptionsTests: BaseTest
     {
         private string _popUpSelector = "#lightBoxWhiteBox";
         private string _submitButtonSelector = "input[value=Zapisz]";
@@ -39,7 +39,7 @@ namespace TrenditTests
 
             LogInUserAccount();
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ustawienia.php");
+            _webDriver.Navigate().GoToUrl(GetPageUrl());
 
             //kliknąć przycisk Edytuj w sekcji "informacje podstawowe"
             _webDriver.FindElement(By.CssSelector(updateUserBasicDataSelector))
@@ -74,7 +74,7 @@ namespace TrenditTests
 
             LogInUserAccount();
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ustawienia.php");
+            _webDriver.Navigate().GoToUrl(GetPageUrl());
 
             //kliknąć przycisk Edytuj w sekcji "Dane do fakturowania"
             FindAndClick(updateEmailSelector);
@@ -103,7 +103,7 @@ namespace TrenditTests
         {
             LogInUserAccount(); 
 
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ustawienia.php?userSettings=1");
+            _webDriver.Navigate().GoToUrl($"{GetPageUrl()}?userSettings=1");
 
             //kliknąć przycisk Edytuj w sekcji dane podstawowe
             FindAndClick(_editDefaultSettingsTabSelector);
@@ -139,12 +139,12 @@ namespace TrenditTests
         public void CorrectUpdateDefautUserDetails_changePassword_Test()
         {
             string passwordInputSelector = "[name=password]";
-            string newPassword = "nowe_haslo";
+            string newPassword = "nowe_haslo!2";
             string errorMessageSelector = "[id='password.error']";
 
             LogInUserAccount();
-
-            _webDriver.Navigate().GoToUrl($"https://panel.sendit.pl/ustawienia.php?userSettings=1");
+            
+            _webDriver.Navigate().GoToUrl($"{GetPageUrl()}?userSettings=1");
 
             //kliknąć przycisk Zmień hasło
             FindAndClick("[href^='javascript:settingsUserChangePassword']");
@@ -183,6 +183,8 @@ namespace TrenditTests
             var errorMessage = _webDriver.FindElement(By.CssSelector(errorMessageSelector));
             StringAssert.Contains("Niepoprawny login lub hasło.", errorMessage.Text);
         }
+
+        private string GetPageUrl() => $"{_appSettings.UserPanelUrl}/ustawienia.php";
 
         private string FindAndSendKeyFromExamples(string selector, string[] examples)
         {
