@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace JokeApiTests.Models
+namespace ApiTests.JokeApiTests.Models
 {
     public class Flags
     {

@@ -1,4 +1,4 @@
-﻿using JokeApiTests.Models;
+﻿using ApiTests.JokeApiTests.Models;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using RestSharp;
@@ -6,11 +6,11 @@ using System;
 using System.Linq;
 using System.Net;
 
-namespace JokeApiTests
+namespace ApiTests.JokeApiTests
 {
     [Category("Api tests")]
     [Author("Maria", "http://maryistesting.com")]
-    public partial class JokeApiTests
+    public class JokeApiTests
     {
         private RestClient _restClient;
 
