@@ -18,7 +18,7 @@ namespace JokeApiTests
         public void OneTimeSetUp()
         {
             _restClient = new RestClient();
-            _restClient.BaseUrl = new Uri("https://v2.jokeapi.dev/");           
+            _restClient.BaseUrl = new Uri("https://v2.jokeapi.dev/");
         }
 
         [Test]
@@ -81,18 +81,18 @@ namespace JokeApiTests
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
             SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
-                        
+
             StringAssert.AreEqualIgnoringCase("DE", responseJoke.Lang);
 
             Assert.IsTrue(responseJoke.Id >= 0 && responseJoke.Id <= 10);
 
             StringAssert.Contains("twopart", responseJoke.Type);
         }
-        
+
         [Test]
         [Description("Check if api eliminates jokes signed as blacklist: nsfw, religious, racist, sexist, explicit")]
         public void CorrectRequest_return_jokeWithoutBlacklistTest()
-        {            
+        {
             RestRequest restRequest = new RestRequest("joke/Any?blacklistFlags=nsfw,religious,racist,sexist,explicit", Method.GET);
 
             IRestResponse response = _restClient.Execute(restRequest);
@@ -101,10 +101,10 @@ namespace JokeApiTests
 
             SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
 
-            Assert.IsTrue(responseJoke.Flags.Nsfw == false 
-                && responseJoke.Flags.Religious == false 
-                && responseJoke.Flags.Racist == false 
-                && responseJoke.Flags.Sexist == false 
+            Assert.IsTrue(responseJoke.Flags.Nsfw == false
+                && responseJoke.Flags.Religious == false
+                && responseJoke.Flags.Racist == false
+                && responseJoke.Flags.Sexist == false
                 && responseJoke.Flags.Explicit == false);
         }
 
@@ -112,18 +112,18 @@ namespace JokeApiTests
         [Description("Check if api returns jokes contains demanded string")]
         public void CorrectRequest_return_jokeContainsDemandedStringTest()
         {
-         
+
             RestRequest restRequest = new RestRequest("joke/Any?type=single&contains=man", Method.GET);
 
-            IRestResponse response = _restClient.Execute(restRequest);
+                IRestResponse response = _restClient.Execute(restRequest);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
+                SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
 
-            StringAssert.Contains("man", responseJoke.Joke);
+                StringAssert.Contains("man", responseJoke.Joke);
 
-            StringAssert.Contains("single", responseJoke.Type);
+                StringAssert.Contains("single", responseJoke.Type);
         }
 
         [Test]
@@ -156,6 +156,28 @@ namespace JokeApiTests
             IRestResponse response = _restClient.Execute(restRequest);
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+        }
+
+        [Test]
+        [Description("Check if api returns status code 429")]
+        public void ToManyRequest_Test()
+        {
+            RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
+
+            for (int i = 1; i <= 101; i++)
+            {
+                IRestResponse response = _restClient.Execute(restRequest);
+                if (i == 100)
+                {
+                    //sprawdź czy zapytanie nr 100 zakończy się powodzeniem
+                    Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                } 
+                else if (i == 101)
+                {
+                    //sprawdź czy wyświetlono kod błędu 429 Too many requests
+                    Assert.AreEqual(HttpStatusCode.TooManyRequests, response.StatusCode);
+                }
+            }
         }
     }
 }
