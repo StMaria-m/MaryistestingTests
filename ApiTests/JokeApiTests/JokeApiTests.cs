@@ -119,7 +119,7 @@ namespace ApiTests.JokeApiTests
 
                 Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-                SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
+                SingleJokeResponse responseJoke = JsonConvert.DeserializeObject<SingleJokeResponse>(response.Content);
 
                 StringAssert.Contains("man", responseJoke.Joke);
 
