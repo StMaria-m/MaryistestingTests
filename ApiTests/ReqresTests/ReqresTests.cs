@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using RestSharp;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Linq;
 using ApiTests.ReqresTests.Models;
@@ -136,5 +135,83 @@ namespace ApiTests.ReqresTests
             Assert.AreEqual(unknownId, responseData.Data.Id);
         }
 
+        [Test]
+        [Description("Add new user")]
+        public void CorrectRequest_add_newUserTest()
+        {
+            NewUserRequest newUser = new NewUserRequest
+            {
+                Name = "Jan",
+                Job = "tester"
+            };
+
+            var payload = JsonConvert.SerializeObject(newUser);
+
+            RestRequest restRequest = new RestRequest(_userPath, Method.POST);
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+        }
+
+        [Test]
+        [Description("Update user data")]
+        public void CorrectRequest_update_userDataTest()
+        {
+            UpdateUserDataRequest updateUserData = new UpdateUserDataRequest
+            {
+                Name = "Janina",
+                Job = "testerka"
+            };
+
+            var payload = JsonConvert.SerializeObject(updateUserData);
+
+            RestRequest restRequest = new RestRequest($"{_userPath}/11", Method.PUT);
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Test]
+        [Description("Update user data")]
+        public void CorrectRequest_updatePATCH_userDataTest()
+        {
+            NewUserRequest updateUserData = new NewUserRequest
+            {
+                Name = "Joanna"
+            };
+
+            var payload = JsonConvert.SerializeObject(updateUserData);
+
+            RestRequest restRequest = new RestRequest($"{_userPath}/12", Method.PATCH);
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Test]
+        [Description("Registration new user")]
+        public void CorrectRequest_register_newAccountTest()
+        {
+            RegistrationUserRequest newAccount = new RegistrationUserRequest
+            {
+                Email = "michael.lawson@reqres.in",
+                Password = "111222"
+            };
+
+            var payload = JsonConvert.SerializeObject(newAccount);
+
+            RestRequest restRequest = new RestRequest("/api/register", Method.POST);
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+        }
     }
 }
