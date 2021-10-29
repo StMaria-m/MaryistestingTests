@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ApiTests.ReqresTests.Models
 {
-    public class UsersListResponse
+    public class UsersGridResponse
     {
         public int Page { get; set; }
         public int Per_page { get; set; }

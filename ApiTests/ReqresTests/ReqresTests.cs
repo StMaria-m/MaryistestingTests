@@ -13,7 +13,7 @@ namespace ApiTests.ReqresTests
     public class ReqresTests
     {
         private string _userPath = "/api/users";
-        private string _unknonwPath = "/api/unknown";
+        private string _unknownPath = "/api/unknown";
 
         private RestClient _restClient;
 
@@ -34,7 +34,7 @@ namespace ApiTests.ReqresTests
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            UsersListResponse responseData = JsonConvert.DeserializeObject<UsersListResponse>(response.Content);
+            UsersGridResponse responseData = JsonConvert.DeserializeObject<UsersGridResponse>(response.Content);
 
             Assert.IsNotNull(responseData?.Data);
 
@@ -53,7 +53,7 @@ namespace ApiTests.ReqresTests
 
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-            UsersListResponse responseData = JsonConvert.DeserializeObject<UsersListResponse>(response.Content);
+            UsersGridResponse responseData = JsonConvert.DeserializeObject<UsersGridResponse>(response.Content);
 
             Assert.IsNotNull(responseData?.Data);
 
@@ -83,7 +83,7 @@ namespace ApiTests.ReqresTests
         [Description("Check if api returns unknowns list")]
         public void CorrectRequest_apiReturnsUnknownsListTest()
         {
-            RestRequest restRequest = new RestRequest(_unknonwPath, Method.GET);
+            RestRequest restRequest = new RestRequest(_unknownPath, Method.GET);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -102,7 +102,7 @@ namespace ApiTests.ReqresTests
         {
             int total = 12;
 
-            RestRequest restRequest = new RestRequest($"{_unknonwPath}?per_page={total}", Method.GET);
+            RestRequest restRequest = new RestRequest($"{_unknownPath}?per_page={total}", Method.GET);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -118,11 +118,14 @@ namespace ApiTests.ReqresTests
 
         [Test]
         [Description("Check if api returns unknown using id")]
-        public void CorrectRequest_apiReturnsUnknownUsingIdTest()
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(5)]
+        [TestCase(12)]
+        public void CorrectRequest_apiReturnsUnknownUsingIdTest(int unknownId)
         {
-            int unknownId = 1;
 
-            RestRequest restRequest = new RestRequest($"{_unknonwPath}/{unknownId}", Method.GET);
+            RestRequest restRequest = new RestRequest($"{_unknownPath}/{unknownId}", Method.GET);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
