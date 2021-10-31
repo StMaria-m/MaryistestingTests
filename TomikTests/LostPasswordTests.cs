@@ -17,8 +17,6 @@ namespace TomikTests
         [Description("Sprawdzenie logowania z przypomnieniem hasła")]
         public void Test2()
         {
-            RemoveAcceptContainer();
-
             //1. Kliknąć w przycisk "zapomniałem"
             var loginButton = _webDriver.FindElement(By.CssSelector(".forgotPass"));
             loginButton.Click();
@@ -49,8 +47,6 @@ namespace TomikTests
         [Description("Sprawdzenie logowania z przypomnieniem hasła i wpisaniem błędnego adresu e-mail")]
         public void Test3()
         {
-            RemoveAcceptContainer();
-
             //1.Wpisać błędny format adresu e-mail, na który ma być wysłane przypomnienie hasła, np. "abcabc.pl"
             var useremail = _webDriver.FindElement(By.CssSelector("#ctl00_CT_txtEmailAddress"));
             useremail.SendKeys("abcabc.pl");

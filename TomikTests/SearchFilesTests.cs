@@ -23,8 +23,6 @@ namespace TomikTests
         [Description("Wyszukiwanie z wyborem z listy rozwijanej")]
         public void CorrectSearchFilesTest()
         {
-            RemoveAcceptContainer();
-
             //1. Uzupełnić pole "Nazwa pliku"
             var searchingInput = _webDriver.FindElement(By.CssSelector(_inputFileNameSelector));
             searchingInput.SendKeys("sapkowski");
@@ -36,8 +34,6 @@ namespace TomikTests
             //3. Kliknąć w przycisk "Szukaj"           
             var searchingAvatar = _webDriver.FindElement(By.CssSelector(_searchButtonSelector));
             searchingAvatar.Click();
-
-            RemoveAcceptContainer();
 
             try
             {
@@ -59,8 +55,6 @@ namespace TomikTests
         [Description("Wyszukiwanie za krótkiej frazy")]
         public void IncorrectSerachFiles_tooShortFileNameTest()
         {
-            RemoveAcceptContainer();
-
             //1. Uzupełnić pole "Nazwa pliku"
             var searchingInput = _webDriver.FindElement(By.CssSelector(_inputFileNameSelector));
             searchingInput.SendKeys("as");

@@ -4,6 +4,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using TomikTests.Enums;
@@ -29,21 +30,24 @@ namespace TomikTests
         {
             _webDriver = new ChromeDriver();
             _webDriver.Manage().Window.Maximize();
-            _webDriver.Url = $"{_appSettings.BaseUrl}/{_path}";
+            _webDriver.Url = $"{_appSettings.BaseUrl}/{_path}";           
 
-        }
+            var cookies = JsonConvert.DeserializeObject<List<NameValueModel>>(_appSettings.CookiesData);
+
+            foreach (NameValueModel cookieData in cookies)
+            {
+                var newCookie = new Cookie(cookieData.Name, cookieData.Value, _appSettings.CookieDomain, "/", DateTime.Now.AddYears(1));
+                _webDriver.Manage().Cookies.AddCookie(newCookie);
+            }
+
+            _webDriver.Navigate().Refresh();
+        }        
 
         [TearDown]
         public void Close()
         {
             _webDriver.Quit();
-        }
-
-        public void RemoveAcceptContainer()
-        {
-            IJavaScriptExecutor js = (IJavaScriptExecutor)_webDriver;
-            js.ExecuteScript("$(\"#acceptChomikujTermsContainer, #acceptChomikujTermsOverlay\").remove()");
-        }
+        }        
 
         public void LogInSteps()
         {
@@ -60,8 +64,6 @@ namespace TomikTests
             createButton.Click();
 
             WaitForAction("#logout");
-
-            RemoveAcceptContainer();
         }
 
         public void WaitForAction(string selector, SearchByTypeEnums selectorType = SearchByTypeEnums.CssSelector)
@@ -83,8 +85,6 @@ namespace TomikTests
         {
             var userAccount = _webDriver.FindElement(By.CssSelector("#topbarAvatar .friendSmall"));
             userAccount.Click();
-
-            RemoveAcceptContainer();
         }
     }
 }

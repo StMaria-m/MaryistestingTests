@@ -32,8 +32,6 @@ namespace TomikTests
             var userMessages = _webDriver.FindElement(By.CssSelector("#topbarMessage"));
             userMessages.Click();
 
-            RemoveAcceptContainer();
-
             var userAllSendMessagesTab = _webDriver.FindElement(By.CssSelector("#tabMenu a[href$=outbox]"));
             userAllSendMessagesTab.Click();
 
@@ -92,8 +90,6 @@ namespace TomikTests
             //kliknąć w przycisk "Szukaj"           
             var searchingAvatar = _webDriver.FindElement(By.CssSelector($"{_searchFormSelector} .quickSearchButton"));
             searchingAvatar.Click();
-
-            RemoveAcceptContainer();
         }
 
         private void SendMessage(string messageSubject, string messageBodyText)
@@ -136,8 +132,6 @@ namespace TomikTests
             //sprawdzić, czy wiadomość została wysłana - w sekcji wiadomości wysłane
             var userMessages = _webDriver.FindElement(By.CssSelector("#topbarMessage"));
             userMessages.Click();
-
-            RemoveAcceptContainer();
 
             var userAllSendMessagesTab = _webDriver.FindElement(By.CssSelector("#tabMenu a[href$=outbox]"));
             userAllSendMessagesTab.Click();

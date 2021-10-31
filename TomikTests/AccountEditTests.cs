@@ -36,8 +36,6 @@ namespace TomikTests
 
             Thread.Sleep(1000);
 
-            RemoveAcceptContainer();
-
             try
             {
                 //Sprawdzenie płci - jeśli pojawi się symbol wybranej powyżej płci
@@ -113,7 +111,6 @@ namespace TomikTests
                 var checkedChecbox = _webDriver.FindElement(By.CssSelector(checkboxCheckedSelector));
                 checkedChecbox.Click();
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -161,7 +158,6 @@ namespace TomikTests
                 var checkedChecbox = _webDriver.FindElement(By.CssSelector(checkboxCheckedSelector));
                 checkedChecbox.Click();
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -210,7 +206,6 @@ namespace TomikTests
                 var checkedChecbox = _webDriver.FindElement(By.CssSelector(checkboxCheckedSelector));
                 checkedChecbox.Click();
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -259,7 +254,6 @@ namespace TomikTests
                 var checkedChecbox = _webDriver.FindElement(By.CssSelector(checkboxCheckedSelector));
                 checkedChecbox.Click();
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -309,7 +303,6 @@ namespace TomikTests
                 var checkedChecbox = _webDriver.FindElement(By.CssSelector(checkboxCheckedSelector));
                 checkedChecbox.Click();
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -358,7 +351,6 @@ namespace TomikTests
                 var checkedChecbox = _webDriver.FindElement(By.CssSelector(checkboxCheckedSelector));
                 checkedChecbox.Click();
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -406,7 +398,6 @@ namespace TomikTests
                 var checkedChecbox = _webDriver.FindElement(By.CssSelector(checkboxCheckedSelector));
                 checkedChecbox.Click();
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -455,7 +446,6 @@ namespace TomikTests
                 var accessType2 = _webDriver.FindElement(By.CssSelector("#cbAccessRead"));
                 new SelectElement(accessType2).SelectByValue("ForAll");
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -514,7 +504,6 @@ namespace TomikTests
                 var accessType2 = _webDriver.FindElement(By.CssSelector("#cbAccessControl"));
                 new SelectElement(accessType2).SelectByValue("OwnerOnly");
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -573,7 +562,6 @@ namespace TomikTests
                 var accessType2 = _webDriver.FindElement(By.CssSelector("#cbAccessControl"));
                 new SelectElement(accessType2).SelectByValue("OwnerOnly");
                 _webDriver.Navigate().Refresh();
-                RemoveAcceptContainer();
             }
             catch (OpenQA.Selenium.NoSuchElementException)
             {
@@ -598,8 +586,6 @@ namespace TomikTests
         {
             var optionButton = _webDriver.FindElement(By.CssSelector("#topbarOptions"));
             optionButton.Click();
-
-            RemoveAcceptContainer();
         }
 
         private void ClickAboutMeTabStep()
