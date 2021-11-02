@@ -2,6 +2,8 @@
 ##### For more informations about my work go there [blog](https://maryistesting.com)
 ##### Repository contains Selenium tests and API tests.
 &nbsp; 
+
+### Selenium Tests
 #### - TrenditTests
 The project includes Selenium tests popular website in Poland, which is use to prepare shipping document by customers.
 
@@ -11,5 +13,8 @@ The project includes Selenium tests popular website in Poland which is use to sh
 #### - OliksTests
 The project includes Selenium tests of Polish website which is use to publish various kinds of offers, eg.sales offers, job offers.
 
-#### - JokeApiTests
-The project includes API tests of [JokeApi Project](https://github.com/Sv443/JokeAPI)
+### API integration tests
+#### - [JokeApiTests](https://github.com/Sv443/JokeAPI)
+#### - [chucknorris](https://api.chucknorris.io)
+#### - [reqres.in](reqres.in)
+#### - [covid19](covid19-api.com)
