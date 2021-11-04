@@ -1,53 +1,61 @@
-﻿using NUnit.Framework;
+﻿using Newtonsoft.Json;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using System;
+using System.IO;
 using TomikTests.Enums;
+using TomikTests.Helpers;
+using TomikTests.Models;
+using TomikTests.Wrappers;
 
 namespace TomikTests
 {
-    public class SendingMessagesTests : BaseTest
+    [Parallelizable(ParallelScope.Children)]
+    public class SendingMessagesTests
     {
-        private string _userName = "m.test";        
+        private string _userName = "m.test";
         private string _messageBodyText = "To jest wiadomość testowa";
         private string _confirmSendMessage = ".//*[contains(text(), 'Wiadomość została wysłana!')]";
 
         private string _newMessageTooltipSelector = "#ui-tooltip-writePrivateMessage";
         private string _searchFormSelector = "#searchFormAccounts";
-        
+
+        protected AppSettingsModel _appSettings;
+
+        [OneTimeSetUp]
+        public void PrepareData()
+        {
+            var appSettingsString = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}//appsettings.json");
+            _appSettings = JsonConvert.DeserializeObject<AppSettingsModel>(appSettingsString);
+        }
+
         [Test]
         [Category("Sending messages tests")]
         [Author("Maria", "http://maryistesting.com")]
         [Description("Wyszukiwanie  chomików")]
         public void CorrectSendMessagesCheckOutboxTest()
         {
+            var browserWrapper = OpenBrowser();
+            var webDriver = browserWrapper.GetWebDriver();
+
             string messageSubject = Guid.NewGuid().ToString();
 
-            LogInSteps();
+            SearchUserByFullName(_userName, webDriver);
 
-            SearchUserByFullName(_userName);
-
-            SendMessage(messageSubject, _messageBodyText);
+            SendMessage(messageSubject, _messageBodyText, browserWrapper);
 
             //sprawdzić, czy wiadomość została wysłana - w sekcji wiadomości wysłane
-            var userMessages = _webDriver.FindElement(By.CssSelector("#topbarMessage"));
+            var userMessages = webDriver.FindElement(By.CssSelector("#topbarMessage"));
             userMessages.Click();
 
-            var userAllSendMessagesTab = _webDriver.FindElement(By.CssSelector("#tabMenu a[href$=outbox]"));
+            var userAllSendMessagesTab = webDriver.FindElement(By.CssSelector("#tabMenu a[href$=outbox]"));
             userAllSendMessagesTab.Click();
 
-            WaitForAction("#outbox");
+            browserWrapper.WaitForAction("#outbox");
 
-            try
-            {
-                //sprawdzić, czy w wysłanych wiadomościach jest wiadomość testowa
-                _webDriver.FindElement(By.XPath($".//*[contains(text(), '{messageSubject}')]"));
-            }
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Fail("The message is not in the outbox");
-                return;
-            }
-            Assert.Pass();
+            Assert.DoesNotThrow(() => webDriver.FindElement(By.XPath($".//*[contains(text(), '{messageSubject}')]")));
+           
+            webDriver.Quit();
         }
 
         [Test]
@@ -58,62 +66,17 @@ namespace TomikTests
         {
             string messageSubject = Guid.NewGuid().ToString();
 
-            LogInSteps();
+            var browserWrapper = OpenBrowser();
+            var webDriver = browserWrapper.GetWebDriver();
 
-            SearchUserByFullName(_userName);
+            SearchUserByFullName(_userName, webDriver);
 
-            SendMessage(messageSubject, _messageBodyText);
+            SendMessage(messageSubject, _messageBodyText, browserWrapper);
 
-            try
-            {
-                //sprawdzić, czy pojawił się komunikat o wysłaniu wiadomości
-                _webDriver.FindElement(By.XPath(_confirmSendMessage));
-            }
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Fail("Message is not send");
-                return;
-            }
-            Assert.Pass();
-        }
+            Assert.DoesNotThrow(() => webDriver.FindElement(By.XPath(_confirmSendMessage)));
 
-        private void SearchUserByFullName(string userName)
-        {
-            //zaznaczyć radio button wyszukiwanie chomików i wpisać pełną unikatową nazwę chomika
-            var inputRadio = _webDriver.FindElement(By.CssSelector("#searchOptionAccount"));
-            inputRadio.Click();
-
-            //uzupełnić pole "Nazwa"
-            var searchingInput = _webDriver.FindElement(By.CssSelector($"{_searchFormSelector} #Query"));
-            searchingInput.SendKeys(userName);
-
-            //kliknąć w przycisk "Szukaj"           
-            var searchingAvatar = _webDriver.FindElement(By.CssSelector($"{_searchFormSelector} .quickSearchButton"));
-            searchingAvatar.Click();
-        }
-
-        private void SendMessage(string messageSubject, string messageBodyText)
-        {
-            //kliknąć "Wyslij wiadomość do chomika"
-            var sendMessageSelector = _webDriver.FindElement(By.CssSelector("#accInfoSendMsg"));
-            sendMessageSelector.Click();
-
-            WaitForAction(_newMessageTooltipSelector);
-
-            //wpisać temat wiadomości
-            var messageSubjectInput = _webDriver.FindElement(By.CssSelector($"{_newMessageTooltipSelector} #Subject"));
-            messageSubjectInput.SendKeys(messageSubject);
-
-            //wpisać treść wiadomości
-            var messageBodyInput = _webDriver.FindElement(By.CssSelector($"{_newMessageTooltipSelector} #Body"));
-            messageBodyInput.SendKeys(messageBodyText);
-
-            //kliknać "Wyślij"
-            var sendMessage = _webDriver.FindElement(By.CssSelector("#sendPMBtn"));
-            sendMessage.Click();
-
-            WaitForAction(_confirmSendMessage, SearchByTypeEnums.XPath);
-        }
+            webDriver.Quit();           
+        }       
 
         [Test]
         [Category("Sending messages tests")]
@@ -123,43 +86,86 @@ namespace TomikTests
         {
             string messageSubject = Guid.NewGuid().ToString();
 
-            LogInSteps();
+            var browserWrapper = OpenBrowser();
+            var webDriver = browserWrapper.GetWebDriver();
 
-            SearchUserByFullName(_userName);
+            SearchUserByFullName(_userName, webDriver);
 
-            SendMessage(messageSubject, _messageBodyText);
+            SendMessage(messageSubject, _messageBodyText, browserWrapper);
 
             //sprawdzić, czy wiadomość została wysłana - w sekcji wiadomości wysłane
-            var userMessages = _webDriver.FindElement(By.CssSelector("#topbarMessage"));
+            var userMessages = webDriver.FindElement(By.CssSelector("#topbarMessage"));
             userMessages.Click();
 
-            var userAllSendMessagesTab = _webDriver.FindElement(By.CssSelector("#tabMenu a[href$=outbox]"));
+            var userAllSendMessagesTab = webDriver.FindElement(By.CssSelector("#tabMenu a[href$=outbox]"));
             userAllSendMessagesTab.Click();
 
-            WaitForAction("#outbox");
-
+            browserWrapper.WaitForAction("#outbox tbody > tr");
+          
             //znajdź wiadomośc testową w wysłanych wiadomościach i kliknij
-            var sentTestMessage = _webDriver.FindElement(By.XPath($"//a[contains(text(), '{messageSubject}')]"));
+            var sentTestMessage = webDriver.FindElement(By.XPath($"//a[contains(text(), '{messageSubject}')]"));
             sentTestMessage.Click();
 
-            WaitForAction("#SelectedMessageContainer");
+            browserWrapper.WaitForAction("#SelectedMessageContainer .deleteMessage");
 
-            var deleteMessage = _webDriver.FindElement(By.XPath($".//*[contains(text(), 'Usuń')]"));
+            var deleteMessage = webDriver.FindElement(By.CssSelector("#SelectedMessageContainer > .readMessageHeader > .deleteMessage"));
             deleteMessage.Click();
 
-            WaitForAction("#outbox");
+            browserWrapper.WaitForAction("#outbox tbody > tr");
 
-            try
-            {
-                //sprawdzić, czy wiadomość została usunięta ze skrzynki nadawczej
-                _webDriver.FindElement(By.XPath($".//*[contains(text(), '{messageSubject}')]"));
-            }
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Pass("The message has been removed");
-                return;
-            }
-            Assert.Pass();
+            Assert.DoesNotThrow(() => webDriver.FindElement(By.XPath($".//*[contains(text(), '{messageSubject}')]")));
+
+            webDriver.Quit();           
         }
+
+        private void SearchUserByFullName(string userName, IWebDriver webDriver)
+        {
+            //zaznaczyć radio button wyszukiwanie chomików i wpisać pełną unikatową nazwę chomika
+            var inputRadio = webDriver.FindElement(By.CssSelector("#searchOptionAccount"));
+            inputRadio.Click();
+
+            //uzupełnić pole "Nazwa"
+            var searchingInput = webDriver.FindElement(By.CssSelector($"{_searchFormSelector} #Query"));
+            searchingInput.SendKeys(userName);
+
+            //kliknąć w przycisk "Szukaj"           
+            var searchingAvatar = webDriver.FindElement(By.CssSelector($"{_searchFormSelector} .quickSearchButton"));
+            searchingAvatar.Click();
+        }
+
+        private void SendMessage(string messageSubject, string messageBodyText, BrowserWrapper browserWrapper)
+        {
+            var webDriver = browserWrapper.GetWebDriver();
+
+            //kliknąć "Wyslij wiadomość do chomika"
+            var sendMessageSelector = webDriver.FindElement(By.CssSelector("#accInfoSendMsg"));
+            sendMessageSelector.Click();
+
+            browserWrapper.WaitForAction(_newMessageTooltipSelector);
+
+            //wpisać temat wiadomości
+            var messageSubjectInput = webDriver.FindElement(By.CssSelector($"{_newMessageTooltipSelector} #Subject"));
+            messageSubjectInput.SendKeys(messageSubject);
+
+            //wpisać treść wiadomości
+            var messageBodyInput = webDriver.FindElement(By.CssSelector($"{_newMessageTooltipSelector} #Body"));
+            messageBodyInput.SendKeys(messageBodyText);
+
+            //kliknać "Wyślij"
+            var sendMessage = webDriver.FindElement(By.CssSelector("#sendPMBtn"));
+            sendMessage.Click();
+
+            browserWrapper.WaitForAction(_confirmSendMessage, SearchByTypeEnums.XPath);
+        }
+
+        private BrowserWrapper OpenBrowser()
+        {
+            BrowserWrapper browserWrapper = new BrowserWrapper(_appSettings);
+            browserWrapper.CreateWebDriver();
+            browserWrapper.AddCookie();
+
+            ProcessStepHeplers.LogInSteps(browserWrapper, _appSettings);
+            return browserWrapper;
+        }       
     }
 }

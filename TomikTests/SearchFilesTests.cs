@@ -1,21 +1,32 @@
-﻿using NUnit.Framework;
+﻿using Newtonsoft.Json;
+using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
-using System.Threading;
+using System;
+using System.IO;
+using TomikTests.Models;
+using TomikTests.Wrappers;
 
 namespace TomikTests
 {
-    public class SearchFilesTests: BaseTest
+    [Parallelizable(ParallelScope.Children)]
+    public class SearchFilesTests
     {
+        private string _path = "action/SearchFiles";
+
         private string _inputFileNameSelector = "#FileName";
         private string _selectFileTypeSelector = "#FileType";
         private string _searchButtonSelector = "#Search"; 
         private string _resultContainerSelector = "#searchFilesView";
 
-        public SearchFilesTests()
+        protected AppSettingsModel _appSettings;
+
+        [OneTimeSetUp]
+        public void PrepareData()
         {
-            _path = "action/SearchFiles";
-        }        
+            var appSettingsString = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}//appsettings.json");
+            _appSettings = JsonConvert.DeserializeObject<AppSettingsModel>(appSettingsString);
+        }      
 
         [Test]
         [Category("Search files tests")]
@@ -23,30 +34,23 @@ namespace TomikTests
         [Description("Wyszukiwanie z wyborem z listy rozwijanej")]
         public void CorrectSearchFilesTest()
         {
+            var webDriver = OpenBrowser();
+
             //1. Uzupełnić pole "Nazwa pliku"
-            var searchingInput = _webDriver.FindElement(By.CssSelector(_inputFileNameSelector));
+            var searchingInput = webDriver.FindElement(By.CssSelector(_inputFileNameSelector));
             searchingInput.SendKeys("sapkowski");
 
             //2. Wybrać rodzaj plików z listy rozwijanej
-            var selectOptions = _webDriver.FindElement(By.CssSelector(_selectFileTypeSelector));
+            var selectOptions = webDriver.FindElement(By.CssSelector(_selectFileTypeSelector));
             new SelectElement(selectOptions).SelectByValue("video");            
 
             //3. Kliknąć w przycisk "Szukaj"           
-            var searchingAvatar = _webDriver.FindElement(By.CssSelector(_searchButtonSelector));
+            var searchingAvatar = webDriver.FindElement(By.CssSelector(_searchButtonSelector));
             searchingAvatar.Click();
 
-            try
-            {
-                //4. Sprawdzenie czy pojawi się galaria wyników wyszukiwania, (jeśli tak, to wyszukiwarka działa poprawnie)
-                _webDriver.FindElement(By.CssSelector($"{_resultContainerSelector} .filerow"));
-            }
-            catch (OpenQA.Selenium.NoSuchElementException)
-            {
-                Assert.Fail("List not found");
-                return;
-            }
+            Assert.DoesNotThrow(() => webDriver.FindElement(By.CssSelector($"{_resultContainerSelector} .filerow")));
 
-            Assert.Pass();
+            webDriver.Quit();           
         }
 
         [Test]
@@ -55,17 +59,29 @@ namespace TomikTests
         [Description("Wyszukiwanie za krótkiej frazy")]
         public void IncorrectSerachFiles_tooShortFileNameTest()
         {
+            var webDriver = OpenBrowser();
+
             //1. Uzupełnić pole "Nazwa pliku"
-            var searchingInput = _webDriver.FindElement(By.CssSelector(_inputFileNameSelector));
+            var searchingInput = webDriver.FindElement(By.CssSelector(_inputFileNameSelector));
             searchingInput.SendKeys("as");
 
             //2. Kliknąć w przycisk "Szukaj"           
-            var searchingAvatar = _webDriver.FindElement(By.CssSelector(_searchButtonSelector));
+            var searchingAvatar = webDriver.FindElement(By.CssSelector(_searchButtonSelector));
             searchingAvatar.Click();
 
             //3. Sprawdzenie komunikatu walidacyjnego
-            var loginError = _webDriver.FindElement(By.CssSelector($"{_resultContainerSelector} div:last-child h1"));
+            var loginError = webDriver.FindElement(By.CssSelector($"{_resultContainerSelector} div:last-child h1"));
             StringAssert.Contains("Wprowadzone zapytanie jest za krótkie", loginError.Text);
-        }      
+
+            webDriver.Quit();
+        }
+
+        private IWebDriver OpenBrowser()
+        {
+            BrowserWrapper browserWrapper = new BrowserWrapper(_appSettings);
+            browserWrapper.CreateWebDriver(_path);
+            browserWrapper.AddCookie();
+            return browserWrapper.GetWebDriver();
+        }
     }
 }
