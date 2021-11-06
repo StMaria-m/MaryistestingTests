@@ -4,6 +4,7 @@ using NUnit.Framework;
 using RestSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 
@@ -55,17 +56,19 @@ namespace ApiTests.CovidApiTests
 
             Assert.IsNotNull(responseData?.Count);
 
-            RestRequest restRequestAllCountries = new RestRequest("/help/countries", Method.GET);
+            var countriesData = GetCountriesData();
 
-            IRestResponse responseAllCountries = _restClient.Execute(restRequestAllCountries);
+            Assert.AreEqual(responseData.Count, countriesData.Count);
+            
+            foreach ( var countryReport in responseData)
+            {
+                if (!countriesData.Any(x => x.Name == countryReport.Country))
+                {
+                    Assert.Fail($"{countryReport.Country} do not return data");
+                }
+            }
 
-            Assert.AreEqual(HttpStatusCode.OK, responseAllCountries.StatusCode);
-
-            IList<CountryModel> responseData2 = JsonConvert.DeserializeObject<IList<CountryModel>>(responseAllCountries.Content);
-
-            Assert.IsNotNull(responseData?.Count);
-
-            Assert.AreEqual(responseData.Count, responseData2.Count);
+            Assert.Pass();
         }
 
         [Test]
@@ -85,7 +88,58 @@ namespace ApiTests.CovidApiTests
 
             Assert.IsNotNull(responseData?.Count);
             Assert.IsTrue(responseData.All(x => x.Code.Contains(countryCode, StringComparison.CurrentCultureIgnoreCase)));
-        }       
+        }
+
+        [Test]
+        [Description("Check if api returns daily report by country code")]
+        [TestCase("Pl", "2021-10-25")]
+        public void CorrectRequest_apiReturnsDailyReportByCountryCodeTest(string countryCode, string date)
+        {
+            RestRequest restRequest = new RestRequest($"/report/country/code?code={countryCode}&date={date}", Method.GET);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            IList<DailyReportModel> responseData = JsonConvert.DeserializeObject<IList<DailyReportModel>>(response.Content);
+
+            Assert.IsNotNull(responseData?.Count);
+            Assert.IsTrue(responseData.All(x => x.Date.Contains(date, StringComparison.CurrentCultureIgnoreCase)));
+        }
+
+        [Test]
+        [Description("Check if api response countries data is the same as json file")]
+        public void CorrectRequest_checkIfCountriesDataAreValid()
+        {
+            RestRequest restRequest = new RestRequest("/help/countries", Method.GET);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            IList<CountryModel> responseData = JsonConvert.DeserializeObject<IList<CountryModel>>(response.Content);
+
+            Assert.IsNotNull(responseData?.Count);
+
+            var countriesData = GetCountriesData();
+
+            Assert.AreEqual(responseData.Count, countriesData.Count);
+            
+            var countryNamesJson = countriesData.Select(x => x.Name).ToList();
+
+            List<string> countryNamesAPI = new List<string>();
+            foreach (var countryModel in responseData)
+            {
+                countryNamesAPI.Add(countryModel.Name);
+            }
+
+            CollectionAssert.AreEqual(countryNamesJson, countryNamesAPI);
+        }
+        public IList<CountryModel> GetCountriesData()
+        {
+            var countriesDataString = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}//CovidApiTests\\Data//CountriesData.json");
+            return JsonConvert.DeserializeObject<IList<CountryModel>>(countriesDataString);
+        }
     }
 }
 

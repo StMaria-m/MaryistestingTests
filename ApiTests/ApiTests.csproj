@@ -18,4 +18,10 @@
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="94.0.4606.6100" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="CovidApiTests\Data\CountriesData.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
