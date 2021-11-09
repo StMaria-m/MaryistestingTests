@@ -84,6 +84,59 @@ namespace TrenditTests
             Assert.IsNotNull(GetAccountNumberInput(newAccountNumber));
         }
 
+        [Test]
+        [Description("Sprawdzenie braku możliwości dodania dubla numeru konta bankowego do listy kont w sekcji 'Pobrania'")]
+        public void NegativeAddBankAccountWithSameNumberTest()
+        {
+            string accountNumber = "999900008888777766665555";
+           
+            LogInUserAccount();
+            _webDriver.Navigate().GoToUrl($"{_appSettings.UserPanelUrl}/ustawienia.php");
+
+            AddNewBankAccountIfNull(accountNumber, _accountNameInput);
+
+            AddNewBankAccount(accountNumber, _accountNameInput);
+           
+            //sprawdzić czy nowe konto zostało dodane
+            //kliknąć przycisk Edytuj
+            FindAndClick("a[href='javascript:settingsCompanyBankAccountEdit();']");
+
+            WaitForElementDisplayed(_popUpSelector);
+
+            //sprawdzić czy na liście numerów rachunków są 2 konta o dodanym numerze konta
+            var bankAccountsList = _webDriver.FindElements(By.CssSelector("input[name^=bankaccount_list]"));
+            var bankAccountsNumbers = bankAccountsList.Where(x => x.GetAttribute("value") == accountNumber).ToList();
+
+            Assert.AreEqual(1, bankAccountsNumbers.Count);
+        }
+
+        [Test]
+        [Description("Dodanie dubla nazwy konta bankowego do listy kont w sekcji 'Pobrania'")]
+        public void AddBankAccountWithSameNameTest()
+        {
+            string accountNumber = "999900008888777766665555";
+            string newAccountNumber = "999900008888777766665555111";
+
+            LogInUserAccount();
+            _webDriver.Navigate().GoToUrl($"{_appSettings.UserPanelUrl}/ustawienia.php");
+
+            AddNewBankAccountIfNull(accountNumber, _accountNameInput);
+
+            AddNewBankAccount(newAccountNumber, _accountNameInput);
+
+            //sprawdzić czy nowe konto zostało dodane
+            //kliknąć przycisk Edytuj
+            FindAndClick("a[href='javascript:settingsCompanyBankAccountEdit();']");
+
+            WaitForElementDisplayed(_popUpSelector);
+
+            //sprawdzić czy na liście numerów rachunków są 2 konta o tym samej nazwie
+            var bankAccountsList = _webDriver.FindElements(By.CssSelector("input[name^=bankaccount_list]"));
+            var bankAccountsNames = bankAccountsList.Where(x => x.GetAttribute("value") == _accountNameInput).ToList();
+
+            Assert.AreEqual(2, bankAccountsNames.Count);
+        }
+
         private string GetPageUrl() => $"{_appSettings.UserPanelUrl}/ustawienia.php";     
 
         private void AddNewBankAccount(string accountNumber, string accountNameInput)

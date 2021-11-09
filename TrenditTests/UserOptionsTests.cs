@@ -2,18 +2,24 @@
 using OpenQA.Selenium;
 using System.Threading;
 using System.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace TrenditTests
 {
     [Author("Maria", "http://maryistesting.com")]
     [Category("Update user details")]
-    public class UserOptionsTests: BaseTest
+    public class UserOptionsTests : BaseTest
     {
         private string _popUpSelector = "#lightBoxWhiteBox";
         private string _submitButtonSelector = "input[value=Zapisz]";
         private string _editDefaultSettingsTabSelector = "[href^='javascript:settingsUserBasicInfo']";
         private string _userNameInputSelector = "[name='user[first_name]']";
         private string _userPhoneInputSelector = "[name='user[phone_number]']";
+
+        private string _accountNameInput = "przyjaznaNazwa";
+        private string accountNameSelector = "[name='bankaccount[alias]']";
+        private string accountNumberSelector = "[name='bankaccount[number]']";
 
         private static string[] _nameExamples = new string[3]
         {
@@ -95,13 +101,13 @@ namespace TrenditTests
             //porównać informacje, które zostały wpisane z wyświetlonymi
             var emailToCheck = _webDriver.FindElement(By.CssSelector(billsDetailsInputSelector));
             StringAssert.Contains(emailInput, emailToCheck.GetAttribute("value"));
-        }      
+        }
 
         [Test]
         [Description("Edycja moich ustawień domyślnych - edycja nr telefonu")]
         public void CorrectUpdateDefautUserDetails_updateContactPersonAddPhone_Test()
         {
-            LogInUserAccount(); 
+            LogInUserAccount();
 
             _webDriver.Navigate().GoToUrl($"{GetPageUrl()}?userSettings=1");
 
@@ -143,7 +149,7 @@ namespace TrenditTests
             string errorMessageSelector = "[id='password.error']";
 
             LogInUserAccount();
-            
+
             _webDriver.Navigate().GoToUrl($"{GetPageUrl()}?userSettings=1");
 
             //kliknąć przycisk Zmień hasło
@@ -197,5 +203,10 @@ namespace TrenditTests
 
             return newValue;
         }
+               
+     
+
+        
+       
     }
 }
