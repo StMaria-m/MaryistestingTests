@@ -51,24 +51,12 @@ namespace ApiTests.ChuckNorrisTests
         [Test]
         [Description("Check if api returns jokes contain demanded string")]
         [TestCase("money")]
-        [TestCase("tree")]
+        [TestCase("1111111111111111")]
         [TestCase("smoke")]
         [TestCase("fish")]
         public void CorrectRequest_return_jokesContainsDemandedStringTest_testCase_version(string keyWord)
         {
-            RestRequest restRequest = new RestRequest($"jokes/search?query={keyWord}", Method.GET);
-
-            IRestResponse response = _restClient.Execute(restRequest);
-
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
-            var responseJokes = JsonConvert.DeserializeObject<JokesResponse>(response.Content);
-
-            Assert.IsTrue(responseJokes.Total > 0);
-            Assert.AreEqual(responseJokes.Total, responseJokes.Result.Count);
-
-            bool ifAllContains = responseJokes.Result.All(x => x.Value.Contains(keyWord, StringComparison.CurrentCultureIgnoreCase));
-            Assert.IsTrue(ifAllContains);
+            JokesContainsDemandedStringTest(keyWord);
         }
 
         [Test]
@@ -85,21 +73,24 @@ namespace ApiTests.ChuckNorrisTests
 
             foreach (var keyWord in keyWords)
             {
-                RestRequest restRequest = new RestRequest($"jokes/search?query={keyWord}", Method.GET);
-
-                IRestResponse response = _restClient.Execute(restRequest);
-
-                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
-                var responseJokes = JsonConvert.DeserializeObject<JokesResponse>(response.Content);
-
-                Assert.IsTrue(responseJokes.Total > 0);
-                Assert.AreEqual(responseJokes.Total, responseJokes.Result.Count);
-
-                bool ifAllContains = responseJokes.Result.All(x => x.Value.Contains(keyWord, StringComparison.CurrentCultureIgnoreCase));
-                Assert.IsTrue(ifAllContains);
+                JokesContainsDemandedStringTest(keyWord);
             }
-        }       
+        }
+
+        private void JokesContainsDemandedStringTest(string keyWord)
+        {
+            RestRequest restRequest = new RestRequest("jokes/search", Method.GET);
+            restRequest.AddParameter("query", keyWord);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            var responseJokes = JsonConvert.DeserializeObject<JokesResponse>(response.Content);
+
+            Assert.Greater(responseJokes.Total, 0);
+            Assert.AreEqual(responseJokes.Total, responseJokes.Result.Count);
+            Assert.IsTrue(responseJokes.Result.All(x => x.Value.Contains(keyWord, StringComparison.CurrentCultureIgnoreCase)));
+        }        
 
         [Test]
         [Description("Check if api returns joke")]
