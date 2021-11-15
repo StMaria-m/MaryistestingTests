@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using RestSharp;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
@@ -36,7 +37,18 @@ namespace ApiTests.JokeApiTests
         [Description("Check if api returns right id range and amount")]
         public void CorrectRequest_return_rightIdRangeAndAmountJokesTest()
         {
-            RestRequest restRequest = new RestRequest("joke/Any?idRange=35-78&amount=3", Method.GET);
+            int startIdRange = 35;
+            int endIdRange = 78;
+            int amount = 3;
+
+            RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
+
+            List<Parameter> parameters = new List<Parameter> 
+            {
+                new Parameter ("idRange", $"{startIdRange}-{endIdRange}", ParameterType.QueryString),
+                new Parameter ("amount", amount, ParameterType.QueryString),
+            };
+            restRequest.AddOrUpdateParameters(parameters);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -44,18 +56,29 @@ namespace ApiTests.JokeApiTests
 
             JokesResponse responseJokes = JsonConvert.DeserializeObject<JokesResponse>(response.Content);
 
-            Assert.AreEqual(3, responseJokes.Jokes.Count);
+            Assert.AreEqual(amount, responseJokes.Jokes.Count);
 
-            Assert.IsTrue(responseJokes.Jokes.All(x => x.Id >= 35 && x.Id <= 78));
+            Assert.IsTrue(responseJokes.Jokes.All(x => x.Id >= startIdRange && x.Id <= endIdRange));
         }
 
         [Test]
         [Description("Check if api returns right type of joke")]
         public void CorrectRequest_return_rightTypeOfJokeTest()
         {
-            var type = "twopart";
+            var jokeType = "twopart";
+            int startIdRange = 0;
+            int endIdRange = 10;
+            int amount = 10;
 
-            RestRequest restRequest = new RestRequest($"joke/Programming?type={type}&idRange=0-10&amount=10", Method.GET);
+            RestRequest restRequest = new RestRequest($"joke/Programming", Method.GET);
+            
+            List<Parameter> parameters = new List<Parameter>
+            {
+                new Parameter ("idRange", $"{startIdRange}-{endIdRange}", ParameterType.QueryString),
+                new Parameter ("type", jokeType, ParameterType.QueryString),
+                new Parameter ("amount", amount, ParameterType.QueryString),
+            };
+            restRequest.AddOrUpdateParameters(parameters);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -65,16 +88,30 @@ namespace ApiTests.JokeApiTests
 
             Assert.AreEqual(5, responseJokes.Jokes.Count);
 
-            Assert.IsTrue(responseJokes.Jokes.All(x => x.Id >= 0 && x.Id <= 10));
+            Assert.IsTrue(responseJokes.Jokes.All(x => x.Id >= startIdRange && x.Id <= endIdRange));
 
-            Assert.IsTrue(responseJokes.Jokes.All(x => x.Type == type));
+            Assert.IsTrue(responseJokes.Jokes.All(x => x.Type == jokeType));
         }
 
         [Test]
         [Description("Check if api returns right language")]
         public void CorrectRequest_return_rightLanguageJokeTest()
         {
-            RestRequest restRequest = new RestRequest("joke/Any?lang=de&type=twopart&idRange=0-10", Method.GET);
+
+            string language = "de";
+            string jokeType = "twopart";
+            int startIdRange = 0;
+            int endIdRange = 10;
+
+            RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
+           
+            List<Parameter> parameters = new List<Parameter>
+            {
+                new Parameter ("lang", language, ParameterType.QueryString),
+                new Parameter ("type", jokeType, ParameterType.QueryString),
+                new Parameter ("idRange", $"{startIdRange}-{endIdRange}", ParameterType.QueryString),
+            };
+            restRequest.AddOrUpdateParameters(parameters);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -84,16 +121,17 @@ namespace ApiTests.JokeApiTests
 
             StringAssert.AreEqualIgnoringCase("DE", responseJoke.Lang);
 
-            Assert.IsTrue(responseJoke.Id >= 0 && responseJoke.Id <= 10);
+            Assert.IsTrue(responseJoke.Id >= startIdRange && responseJoke.Id <= endIdRange);
 
-            StringAssert.Contains("twopart", responseJoke.Type);
+            StringAssert.Contains(jokeType, responseJoke.Type);
         }
 
         [Test]
         [Description("Check if api eliminates jokes signed as blacklist: nsfw, religious, racist, sexist, explicit")]
         public void CorrectRequest_return_jokeWithoutBlacklistTest()
         {
-            RestRequest restRequest = new RestRequest("joke/Any?blacklistFlags=nsfw,religious,racist,sexist,explicit", Method.GET);
+            RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
+            restRequest.AddParameter("blacklistFlags", "nsfw,religious,racist,sexist,explicit");
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -112,18 +150,27 @@ namespace ApiTests.JokeApiTests
         [Description("Check if api returns jokes contains demanded string")]
         public void CorrectRequest_return_jokeContainsDemandedStringTest()
         {
+            string jokeType = "single";
+            string searchingKey = "man";
 
-            RestRequest restRequest = new RestRequest("joke/Any?type=single&contains=man", Method.GET);
+            RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
 
-                IRestResponse response = _restClient.Execute(restRequest);
+            List<Parameter> parameters = new List<Parameter>
+            {
+                new Parameter ("type", jokeType, ParameterType.QueryString),
+                new Parameter ("contains", searchingKey, ParameterType.QueryString),
+            };
+            restRequest.AddOrUpdateParameters(parameters);
 
-                Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            IRestResponse response = _restClient.Execute(restRequest);
 
-                SingleJokeResponse responseJoke = JsonConvert.DeserializeObject<SingleJokeResponse>(response.Content);
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
 
-                StringAssert.Contains("man", responseJoke.Joke);
+            SingleJokeResponse responseJoke = JsonConvert.DeserializeObject<SingleJokeResponse>(response.Content);
 
-                StringAssert.Contains("single", responseJoke.Type);
+            StringAssert.Contains(searchingKey, responseJoke.Joke);
+
+            StringAssert.Contains(jokeType, responseJoke.Type);
         }
 
         [Test]
@@ -164,15 +211,15 @@ namespace ApiTests.JokeApiTests
         {
             RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
 
-            for (int i = 1; i <= 101; i++)
+            for (int i = 1; i <= 121; i++)
             {
                 IRestResponse response = _restClient.Execute(restRequest);
-                if (i == 100)
+                if (i == 120)
                 {
-                    //sprawdź czy zapytanie nr 100 zakończy się powodzeniem
+                    //sprawdź czy zapytanie nr 120 zakończy się powodzeniem
                     Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-                } 
-                else if (i == 101)
+                }
+                else if (i == 121)
                 {
                     //sprawdź czy wyświetlono kod błędu 429 Too many requests
                     Assert.AreEqual(HttpStatusCode.TooManyRequests, response.StatusCode);
