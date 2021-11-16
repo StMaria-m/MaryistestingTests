@@ -1,4 +1,5 @@
-﻿using ApiTests.JokeApiTests.Models;
+﻿using ApiTests.JokeApiTests.Data;
+using ApiTests.JokeApiTests.Models;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using RestSharp;
@@ -43,7 +44,7 @@ namespace ApiTests.JokeApiTests
 
             RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
 
-            List<Parameter> parameters = new List<Parameter> 
+            List<Parameter> parameters = new List<Parameter>
             {
                 new Parameter ("idRange", $"{startIdRange}-{endIdRange}", ParameterType.QueryString),
                 new Parameter ("amount", amount, ParameterType.QueryString),
@@ -71,7 +72,7 @@ namespace ApiTests.JokeApiTests
             int amount = 10;
 
             RestRequest restRequest = new RestRequest($"joke/Programming", Method.GET);
-            
+
             List<Parameter> parameters = new List<Parameter>
             {
                 new Parameter ("idRange", $"{startIdRange}-{endIdRange}", ParameterType.QueryString),
@@ -104,7 +105,7 @@ namespace ApiTests.JokeApiTests
             int endIdRange = 10;
 
             RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
-           
+
             List<Parameter> parameters = new List<Parameter>
             {
                 new Parameter ("lang", language, ParameterType.QueryString),
@@ -171,30 +172,13 @@ namespace ApiTests.JokeApiTests
             StringAssert.Contains(searchingKey, responseJoke.Joke);
 
             StringAssert.Contains(jokeType, responseJoke.Type);
-        }
-
+        }       
+                
         [Test]
         [Description("Add new joke")]
-        public void CorrectRequest_add_newJokeTest()
+        [TestCaseSource(typeof(ExampleJokes), nameof(ExampleJokes.Jokes))]
+        public void CorrectRequest_add_newJokeTest(NewJokeRequest newJoke)
         {
-            NewJokeRequest newJoke = new NewJokeRequest
-            {
-                Category = "Dark",
-                FormatVersion = 3,
-                Joke = "ioijioio",
-                Lang = "en",
-                Type = "single",
-                Flags = new Flags
-                {
-                    Explicit = false,
-                    Nsfw = false,
-                    Political = true,
-                    Racist = false,
-                    Religious = false,
-                    Sexist = false
-                }
-            };
-
             var payload = JsonConvert.SerializeObject(newJoke);
 
             RestRequest restRequest = new RestRequest("submit", Method.PUT);
@@ -203,6 +187,22 @@ namespace ApiTests.JokeApiTests
             IRestResponse response = _restClient.Execute(restRequest);
 
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+        }
+        
+        [Test]
+        [Description("Check if each category constains a joke")]
+        [TestCaseSource(typeof(JokeCategories), nameof(JokeCategories.Categories))]
+        public void CorrectRequest_return_jokeFromCategoryTest(string category)
+        {
+            RestRequest restRequest = new RestRequest($"joke/{category}", Method.GET);
+          
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            var responseJokes = JsonConvert.DeserializeObject<SingleJokeResponse>(response.Content);
+            Assert.IsNotNull(responseJokes);
+            Assert.AreEqual(category, responseJokes.Category);           
         }
 
         [Test]
