@@ -1,4 +1,5 @@
-﻿using ApiTests.LoveCalculatorApiTests.Models;
+﻿using ApiTests.LoveCalculatorApiTests.Data;
+using ApiTests.LoveCalculatorApiTests.Models;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using RestSharp;
@@ -105,6 +106,22 @@ namespace ApiTests.LoveCalculatorApiTests
 
         [Test]
         [Description("Check if api returns various results")]
+        [TestCaseSource(typeof(NameSamples), nameof(NameSamples.Names))]
+        public void CorrectRequest_apiReturnsVariousResultsTests_testCaseSource_version(string sname, string fname, string result)
+        {
+            SendAndCheckResult(sname, fname, result);
+        }
+
+        [Test]
+        [Description("Check if api returns various results")]
+        [TestCaseSource(typeof(NameSamples), nameof(NameSamples.SingleLoveData))]
+        public void CorrectRequest_apiReturnsVariousResultsTests_testCaseSource_version(SingleLoveResponse dataSamples)
+        {
+            SendAndCheckResult(dataSamples.Fname, dataSamples.Sname, dataSamples.Percentage);
+        }
+
+        [Test]
+        [Description("Check if api returns various results")]
         [TestCase("John", "Aneta", "56")]
         [TestCase("John", "Aneto", "46")]
         [TestCase("John", "Anetk", "36")]
@@ -174,7 +191,7 @@ namespace ApiTests.LoveCalculatorApiTests
             RestRequest restRequest = new RestRequest($"/getPercentage?sname={sname}&fname={fname}", Method.GET);
 
             restRequest.AddHeader("x-rapidapi-host", "love-calculator.p.rapidapi.com");
-            restRequest.AddHeader("x-rapidapi-key", "my_key");
+            restRequest.AddHeader("x-rapidapi-key", "01f81133bamshf33f32f512aeb3ep1bc9ffjsn006323d1c3d0");
 
             IRestResponse response = _restClient.Execute(restRequest);
 
