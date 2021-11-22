@@ -5,6 +5,8 @@ using RestSharp;
 using System;
 using System.Net;
 using System.Linq;
+using System.IO;
+using ApiTests.MyStoreApiTests.Data;
 
 namespace ApiTests.MyStoreApiTests
 {
@@ -13,12 +15,16 @@ namespace ApiTests.MyStoreApiTests
     public class MyStoreTests
     {
         private RestClient _restClient;
+        private AppsettingsModel _appSettings;
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             _restClient = new RestClient();
             _restClient.BaseUrl = new Uri("https://my-store2.p.rapidapi.com/");
+
+            var appSettingsString = File.ReadAllText($"{AppDomain.CurrentDomain.BaseDirectory}//appsettings.json");
+            _appSettings = JsonConvert.DeserializeObject<AppsettingsModel>(appSettingsString);
         }
 
         [Test]
@@ -26,6 +32,7 @@ namespace ApiTests.MyStoreApiTests
         public void CorrectRequest_apiWorksWellTest()
         {
             RestRequest restRequest = new RestRequest("catalog/products", Method.GET);
+            restRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -38,7 +45,7 @@ namespace ApiTests.MyStoreApiTests
         {
             int id = 19485;
             RestRequest restRequest = new RestRequest($"catalog/product/{id}", Method.GET);
-            restRequest.AddHeader("x-rapidapi-key", "");
+            restRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -58,7 +65,7 @@ namespace ApiTests.MyStoreApiTests
 
             RestRequest restRequest = new RestRequest("catalog/products", Method.GET);
 
-            restRequest.AddHeader("x-rapidapi-key", "");
+            restRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
 
             IRestResponse response = _restClient.Execute(restRequest);
 
@@ -111,5 +118,63 @@ namespace ApiTests.MyStoreApiTests
             Assert.AreEqual(7, responseCategoriesList.Summary.Count);
         }
 
+        [Test]
+        [Description("Delete existing product")]
+        public void CorrectRequest_deleteExistingProductTest()
+        {
+            NewProductRequest newProduct = new NewProductRequest
+            {
+                Name = "table",
+                Price = 10,
+                Manufacturer = "abc",
+                Category = "furniture",
+                Description = "new product description",
+                Tags = "furniture"
+            };
+
+            var productId = AddNewProduct(newProduct).Id;
+
+            RestRequest deleteRequest = new RestRequest($"/catalog/product/{productId}", Method.DELETE);
+            deleteRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
+
+            IRestResponse deleteResponse = _restClient.Execute(deleteRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, deleteResponse.StatusCode);
+
+            DeleteProductResponse deleteProduct = JsonConvert.DeserializeObject<DeleteProductResponse>(deleteResponse.Content);
+            Assert.AreEqual("deleted", deleteProduct.Status);
+        }        
+
+        [Test]
+        [Description("Add new product")]
+        public void CorrectRequest_addNewProductTest()
+        {
+            NewProductRequest payload = new NewProductRequest()
+            {
+                Name = "aaa",
+                Price = 10,
+                Manufacturer = "abc",
+                Category = "  meble",
+                Description = "ccc",
+                Tags = "111"
+            };
+
+            var newProduct = AddNewProduct(payload);
+            Assert.Greater(newProduct.Id, 0);
+        }
+
+        private SingleProductFull AddNewProduct(NewProductRequest newProduct)
+        {
+            var payload = JsonConvert.SerializeObject(newProduct);
+
+            RestRequest restRequest = new RestRequest("/catalog/product", Method.POST);
+            restRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+
+            return JsonConvert.DeserializeObject<SingleProductFull>(response.Content);
+        }        
     }
 }

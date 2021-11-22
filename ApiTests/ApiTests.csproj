@@ -19,6 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appSettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="CovidApiTests\Data\CountriesData.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
