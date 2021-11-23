@@ -175,6 +175,44 @@ namespace ApiTests.MyStoreApiTests
             Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 
             return JsonConvert.DeserializeObject<SingleProductFull>(response.Content);
-        }        
+        }
+
+        [Test]
+        [Description("Check if API adds new product")]
+        [TestCaseSource(typeof(ExampleProduct), nameof(ExampleProduct.Products))]
+        public void CorrectRequest_add_newProductTestVersion(NewProductRequest newProduct)
+        {
+            var payload = JsonConvert.SerializeObject(newProduct);
+
+            RestRequest restRequest = new RestRequest("/catalog/product", Method.POST);
+            restRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+        }
+
+        [Test]
+        [Description("Check if API creates new order")]
+        [TestCaseSource(typeof(ExampleOrder), nameof(ExampleOrder.Orders))]
+        public void CorrectRequest_createNewOrderTest(NewOrderRequest newOrder)
+        {
+            var createdOrder = CreateOrder(newOrder);
+            Assert.Greater(createdOrder.Id, 0);
+        }
+
+        private OrderResponse CreateOrder(NewOrderRequest newOrder)
+        {
+            var payload = JsonConvert.SerializeObject(newOrder);
+
+            RestRequest restRequest = new RestRequest("order/new", Method.POST);
+            restRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
+            restRequest.AddParameter("application/json", payload, ParameterType.RequestBody);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
+
+            return JsonConvert.DeserializeObject<OrderResponse>(response.Content);
+        }
     }
 }
