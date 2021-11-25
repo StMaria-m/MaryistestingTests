@@ -214,5 +214,51 @@ namespace ApiTests.MyStoreApiTests
 
             return JsonConvert.DeserializeObject<OrderResponse>(response.Content);
         }
+
+
+        [Test]
+        [Description("Check if Api returns order by orderId")]
+        public void CorrectRequest_getOrderTest()
+        {
+            NewOrderRequest newOrder = new NewOrderRequest()
+            {
+                Customer = "Jan Kowalski",
+                Address = "Kielce, Brzozowa 22"
+            };
+
+            var createdOrder = CreateOrder(newOrder);
+            Assert.Greater(createdOrder.Id, 0);
+
+            RestRequest restRequest = new RestRequest($"order/{createdOrder.Id}", Method.GET);
+            restRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            GetOrderResponse order = JsonConvert.DeserializeObject<GetOrderResponse>(response.Content);
+            Assert.AreEqual(createdOrder.Id, order.Order.Id);
+
+        }
+
+
+        [Test]
+        [Description("Check if api returns product by product Id")]
+        public void IncorrectRequest_apiReturnsProductTest()
+        {
+            int id = 1;
+            RestRequest restRequest = new RestRequest($"catalog/product/{id}", Method.GET);
+            restRequest.AddHeader("x-rapidapi-key", _appSettings.RapidapiKey);
+
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+
+            ErrorResponse responseProduct = JsonConvert.DeserializeObject<ErrorResponse>(response.Content);
+
+            Assert.IsNotNull(responseProduct);
+
+            StringAssert.Contains($"Product with ID {id} not found", responseProduct.Message);
+        }
+
     }
 }
