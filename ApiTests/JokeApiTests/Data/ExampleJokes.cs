@@ -34,7 +34,7 @@ namespace ApiTests.JokeApiTests.Data
                     FormatVersion = 3,
                     Joke = "Example programming joke",
                     Lang = "de",
-                    Type = "two-part",
+                    Type = "single",
                      Flags = new Flags
                     {
                         Explicit = false,

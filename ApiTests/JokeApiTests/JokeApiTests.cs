@@ -51,11 +51,7 @@ namespace ApiTests.JokeApiTests
             };
             restRequest.AddOrUpdateParameters(parameters);
 
-            IRestResponse response = _restClient.Execute(restRequest);
-
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
-            JokesResponse responseJokes = JsonConvert.DeserializeObject<JokesResponse>(response.Content);
+            JokesResponse responseJokes = ExecuteRequest<JokesResponse>(restRequest);
 
             Assert.AreEqual(amount, responseJokes.Jokes.Count);
 
@@ -64,9 +60,10 @@ namespace ApiTests.JokeApiTests
 
         [Test]
         [Description("Check if api returns right type of joke")]
-        public void CorrectRequest_return_rightTypeOfJokeTest()
+        [TestCase("twopart", 5)]
+        [TestCase("single", 6)]
+        public void CorrectRequest_return_rightTypeOfJokeTest(string jokeType, int jokesNumber)
         {
-            var jokeType = "twopart";
             int startIdRange = 0;
             int endIdRange = 10;
             int amount = 10;
@@ -81,13 +78,9 @@ namespace ApiTests.JokeApiTests
             };
             restRequest.AddOrUpdateParameters(parameters);
 
-            IRestResponse response = _restClient.Execute(restRequest);
+            JokesResponse responseJokes = ExecuteRequest<JokesResponse>(restRequest);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
-            var responseJokes = JsonConvert.DeserializeObject<JokesResponse>(response.Content);
-
-            Assert.AreEqual(5, responseJokes.Jokes.Count);
+            Assert.AreEqual(jokesNumber, responseJokes.Jokes.Count);
 
             Assert.IsTrue(responseJokes.Jokes.All(x => x.Id >= startIdRange && x.Id <= endIdRange));
 
@@ -96,11 +89,10 @@ namespace ApiTests.JokeApiTests
 
         [Test]
         [Description("Check if api returns right language")]
-        public void CorrectRequest_return_rightLanguageJokeTest()
+        [TestCase("twopart", "de")]
+        [TestCase("single", "en")]
+        public void CorrectRequest_return_rightLanguageJokeTest(string jokeType, string language)
         {
-
-            string language = "de";
-            string jokeType = "twopart";
             int startIdRange = 0;
             int endIdRange = 10;
 
@@ -114,13 +106,9 @@ namespace ApiTests.JokeApiTests
             };
             restRequest.AddOrUpdateParameters(parameters);
 
-            IRestResponse response = _restClient.Execute(restRequest);
+            SingleJoke responseJoke = ExecuteRequest<SingleJoke>(restRequest);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
-            SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
-
-            StringAssert.AreEqualIgnoringCase("DE", responseJoke.Lang);
+            StringAssert.AreEqualIgnoringCase(language, responseJoke.Lang);
 
             Assert.IsTrue(responseJoke.Id >= startIdRange && responseJoke.Id <= endIdRange);
 
@@ -134,11 +122,7 @@ namespace ApiTests.JokeApiTests
             RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
             restRequest.AddParameter("blacklistFlags", "nsfw,religious,racist,sexist,explicit");
 
-            IRestResponse response = _restClient.Execute(restRequest);
-
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
-            SingleJoke responseJoke = JsonConvert.DeserializeObject<SingleJoke>(response.Content);
+            SingleJoke responseJoke = ExecuteRequest<SingleJoke>(restRequest);
 
             Assert.IsTrue(responseJoke.Flags.Nsfw == false
                 && responseJoke.Flags.Religious == false
@@ -149,10 +133,11 @@ namespace ApiTests.JokeApiTests
 
         [Test]
         [Description("Check if api returns jokes contains demanded string")]
-        public void CorrectRequest_return_jokeContainsDemandedStringTest()
+        [TestCase("man")]
+        [TestCase("money")]
+        public void CorrectRequest_return_jokeContainsDemandedStringTest(string searchingKey)
         {
             string jokeType = "single";
-            string searchingKey = "man";
 
             RestRequest restRequest = new RestRequest("joke/Any", Method.GET);
 
@@ -163,11 +148,7 @@ namespace ApiTests.JokeApiTests
             };
             restRequest.AddOrUpdateParameters(parameters);
 
-            IRestResponse response = _restClient.Execute(restRequest);
-
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
-            SingleJokeResponse responseJoke = JsonConvert.DeserializeObject<SingleJokeResponse>(response.Content);
+            SingleJokeResponse responseJoke = ExecuteRequest<SingleJokeResponse>(restRequest);
 
             StringAssert.Contains(searchingKey, responseJoke.Joke);
 
@@ -195,12 +176,9 @@ namespace ApiTests.JokeApiTests
         public void CorrectRequest_return_jokeFromCategoryTest(string category)
         {
             RestRequest restRequest = new RestRequest($"joke/{category}", Method.GET);
-          
-            IRestResponse response = _restClient.Execute(restRequest);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-
-            var responseJokes = JsonConvert.DeserializeObject<SingleJokeResponse>(response.Content);
+            var responseJokes = ExecuteRequest<SingleJokeResponse>(restRequest);
+            
             Assert.IsNotNull(responseJokes);
             Assert.AreEqual(category, responseJokes.Category);           
         }
@@ -217,7 +195,7 @@ namespace ApiTests.JokeApiTests
                 if (i == 120)
                 {
                     //sprawdź czy zapytanie nr 120 zakończy się powodzeniem
-                    Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+                    Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, $"Response count {i}");
                 }
                 else if (i == 121)
                 {
@@ -225,6 +203,15 @@ namespace ApiTests.JokeApiTests
                     Assert.AreEqual(HttpStatusCode.TooManyRequests, response.StatusCode);
                 }
             }
+        }
+
+        private T ExecuteRequest<T>(RestRequest restRequest)
+        {
+            IRestResponse response = _restClient.Execute(restRequest);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            return JsonConvert.DeserializeObject<T>(response.Content);
         }
     }
 }
