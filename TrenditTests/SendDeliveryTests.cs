@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using TrenditTests.Helpers;
 
 namespace TrenditTests
 {
@@ -63,6 +64,9 @@ namespace TrenditTests
 
             //kliknąć "Zapłać"
             FindAndClick("#formSubmit");
+
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(CorrectFillShippinigForm_RequiredFieldsOnly_Test));
 
             //sprawdzenie przekierowania na stronę do płatności
             var url = _webDriver.Url;
@@ -164,6 +168,9 @@ namespace TrenditTests
             //kliknąć "Zapłać"
             FindAndClick("#formSubmit");
 
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(CorrectFillVariousFields_SendDelivery_Test));
+
             //sprawdzenie przekierowania na stronę do płatności
             var url = _webDriver.Url;
             StringAssert.Contains("go.przelewy24.pl", url);
@@ -179,6 +186,9 @@ namespace TrenditTests
 
             //w sekcji Rodzaj przesyłki wybrać Paleta/Półpaleta
             FindAndClick("[for=formItemShipmentTypePaletaExpand]");
+
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(CorrectFillShippinigForm_shipmentTypePallet_Test));
 
             //sprawdzić, czy pojawia się przycisk "Kliknij i otrzymaj indywidualną wycenę"
             var messageBox = _webDriver.FindElements(By.CssSelector("#formMessageShipmentPaleta")).FirstOrDefault();
@@ -199,6 +209,9 @@ namespace TrenditTests
             //zaznaczyć checkbox "Materiały niebezpieczne ADR"
             FindAndClick("[for=formItemOption23]");
 
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(CorrectFillShippinigForm_shipmentTypePallet_adrShippment_Test));
+
             //sprawdzić, czy pojawia się przycisk "Kliknij i otrzymaj indywidualną wycenę"
             var messageBox = _webDriver.FindElements(By.CssSelector("#formMessageShipmentPaleta")).FirstOrDefault();
             Assert.IsTrue(messageBox.Displayed);
@@ -215,9 +228,13 @@ namespace TrenditTests
             //w sekcji rodzaj przesyłki wybrać "Koperta"
             FindAndClick("[for=formItemShipmentTypeList]");
 
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(CorrectFillShippinigForm_shipmentTypeEnvelope_Test));
+
             //sprawdzić, czy znika checkbox "Opony"
             var checkboxTyre = _webDriver.FindElements(By.CssSelector("[for=formItemOption82]")).FirstOrDefault();
             Assert.False(checkboxTyre.Displayed);
-        }        
+        }
+        
     }
 }

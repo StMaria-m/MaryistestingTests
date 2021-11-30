@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
 using OpenQA.Selenium;
+using System;
+using TrenditTests.Helpers;
 
 namespace TrenditTests
 {
@@ -21,6 +23,9 @@ namespace TrenditTests
 
             //kliknąć przycisk "Zaloguj się"
             _webDriver.FindElement(By.CssSelector(submitButton)).Click();
+
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(IncorrectLoginTest_noLoginAndNoPassword));
 
             //Sprawdzenie, czy pojawią się dwa komunikaty "Niepoprawny login lub hasło."
             var noData = _webDriver.FindElements(By.CssSelector(errorMessageSelector));
@@ -44,9 +49,12 @@ namespace TrenditTests
             //kliknąć przycisk "Zaloguj się"
             _webDriver.FindElement(By.CssSelector(submitButton)).Click();
 
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(IncorrectLoginTest_wrongLoginAndPasswordLogInTest));
+
             //Sprawdzenie, czy pojawią się dwa komunikaty "Niepoprawny login lub hasło."   
             var noData = _webDriver.FindElements(By.CssSelector(errorMessageSelector));
-            Assert.AreEqual(2, noData.Count);
+            Assert.AreEqual(2, noData.Count);            
         }
 
         [Test]
@@ -67,6 +75,9 @@ namespace TrenditTests
 
             WaitForElementDisplayed(errorPasswordMessageSelector);
 
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(IncorrectLoginTest_noPasswordLogInTest));
+
             //Sprawdzenie, czy pojawi się komunikat "Pole jest wymagane."   
             var noPasswordMessage = _webDriver.FindElements(By.CssSelector(errorPasswordMessageSelector));
             Assert.IsTrue(noPasswordMessage.Count == 1);
@@ -79,6 +90,9 @@ namespace TrenditTests
         public void LogInTest()
         {
             LogInUserAccount();
+
+            PrintScreenHelper newPrintScreen = new PrintScreenHelper(_appSettings, _webDriver);
+            newPrintScreen.TakeScreenShot(nameof(LogInTest));
 
             //sprawdzenie
             var logOutButton = _webDriver.FindElements(By.CssSelector("a[href='/wyloguj']"));
