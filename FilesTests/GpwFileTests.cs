@@ -29,7 +29,7 @@ namespace FilesTests
         }
 
         [Test]
-        public void CheckIfShortsAreUniqu5e()
+        public void CheckIfShortcutsAreUnique()
         {
             var akcjeLista = GetDataFromFile();
 
@@ -42,5 +42,24 @@ namespace FilesTests
             return JsonConvert.DeserializeObject<IList<GpwModel>>(dataString);
         }
 
+        [Test]
+        public void CheckIfNamesAreNotNull()
+        {
+            CheckIfStringIsNullOrEmpty(i => i.Nazwa);
+        }
+
+        [Test]
+        public void CheckIfShortcutsAreNotNull()
+        {
+            CheckIfStringIsNullOrEmpty(i => i.KursOstTransZamkn);
+        }        
+
+        private void CheckIfStringIsNullOrEmpty(Func<GpwModel, string> funcGetPropertyName)
+        {
+            var akcjeLista = GetDataFromFile();
+
+            bool isAny = akcjeLista.Any(i => String.IsNullOrEmpty(funcGetPropertyName(i)));
+            Assert.IsFalse(isAny);
+        }        
     }
 }
