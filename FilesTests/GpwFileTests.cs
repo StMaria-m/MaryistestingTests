@@ -52,7 +52,7 @@ namespace FilesTests
         public void CheckIfShortcutsAreNotNull()
         {
             CheckIfStringIsNullOrEmpty(i => i.KursOstTransZamkn);
-        }        
+        }
 
         private void CheckIfStringIsNullOrEmpty(Func<GpwModel, string> funcGetPropertyName)
         {
@@ -60,6 +60,54 @@ namespace FilesTests
 
             bool isAny = akcjeLista.Any(i => String.IsNullOrEmpty(funcGetPropertyName(i)));
             Assert.IsFalse(isAny);
-        }        
+        }
+
+        [Test]
+        public void CheckIfMarketRateReferenceIsDecimal()
+        {
+            var akcjeLista = GetDataFromFile();
+
+            foreach (var akcja in akcjeLista)
+            {
+                string tekstDocelowy = akcja.KursOdniesienia;
+
+                if (tekstDocelowy.Contains(","))
+                {
+                    tekstDocelowy = tekstDocelowy.Replace(",", ".");
+                }
+
+                string message = $"Name:{akcja.Nazwa} kurs:{akcja.KursOdniesienia}";
+                Assert.DoesNotThrow(() => decimal.Parse(tekstDocelowy), message);
+            }
+        }
+
+        [Test]
+        public void CheckIfIsLastDealIsDate()
+        {
+            var akcjeLista = GetDataFromFile();
+
+            foreach (var akcja in akcjeLista)
+            {
+                string tekstDoSprawdzenia = akcja.CzasOstatniejTransakcji;
+
+                if (tekstDoSprawdzenia == "-")
+                {
+                    Assert.IsTrue(true);
+                }
+                else
+                {
+                    string message = $"Name:{akcja.Nazwa} czas:{akcja.CzasOstatniejTransakcji}";
+                    Assert.DoesNotThrow(() => TimeSpan.Parse(tekstDoSprawdzenia), message);
+                }
+            }
+        }
+
+        [Test]
+        public void CheckIfIsCurrencyIsPLN()
+        {
+            var akcjeLista = GetDataFromFile();
+
+            Assert.IsFalse(akcjeLista.Any(i => i.Waluta != "PLN"));
+        }
     }
 }
