@@ -109,5 +109,57 @@ namespace FilesTests
 
             Assert.IsFalse(akcjeLista.Any(i => i.Waluta != "PLN"));
         }
+
+        [Test]
+        public void CheckIfMaxMarketRateIsGreaterThanMinRate()
+        {
+            var akcjeLista = GetDataFromFile();
+
+            foreach (var akcja in akcjeLista)
+            {
+                string kursMax = akcja.KursMax;
+                string kursMin = akcja.KursMin;
+
+                if (kursMax == "-" || kursMin == "-")
+                {
+                    Assert.IsTrue(true);
+                }
+                else
+                {
+                    try
+                    {
+                        decimal decimalMax = decimal.Parse(kursMax);
+                        decimal decimalMin = decimal.Parse(kursMin);
+                        Assert.GreaterOrEqual(decimalMax, decimalMin);
+                    }
+                    catch
+                    {
+                        var message = $"nazwa: {akcja.Nazwa}, kurs max: {akcja.KursMax}, kurs min: {akcja.KursMin}";
+                        Assert.IsTrue(false, message);
+                    }
+                }
+
+            }
+        }
+
+        [Test]
+        public void CheckIfVolumensAreIntegerPositive()
+        {
+            var akcjeLista = GetDataFromFile();
+
+            foreach (var akcja in akcjeLista)
+            {
+
+                if (akcja.SprzedazWolumen == "-")
+                {
+                    Assert.IsTrue(true);
+                }
+                else
+                {
+                    string message = $"Name:{akcja.Nazwa} wolumen sprzedaż: {akcja.SprzedazWolumen}";
+                    Assert.DoesNotThrow(() => uint.Parse(akcja.SprzedazWolumen), message);
+                }
+            }
+        }
     }
 }
