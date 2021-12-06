@@ -12,7 +12,7 @@ using FilesTests.Models;
 namespace FilesTests
 {
     public class GpwFileTests
-    {
+    {        
         [Test]
         public void CheckIfNamesAreUnique()
         {
@@ -160,6 +160,38 @@ namespace FilesTests
                     Assert.DoesNotThrow(() => uint.Parse(akcja.SprzedazWolumen), message);
                 }
             }
+        }        
+
+        [Test]
+        public void CheckIfNumberOfMarketOrderIsInteger()
+        {
+            CheckIfValueIsInteger(i => i.LiczbaTransakcji, nameof(GpwModel.LiczbaTransakcji));
         }
+
+        [Test]
+        public void CheckIfVolumenLastDealIsInteger()
+        {
+            CheckIfValueIsInteger(i => i.WolumenOstTrans, nameof(GpwModel.WolumenOstTrans));
+        }
+
+        private void CheckIfValueIsInteger(Func<GpwModel, string> funcGetPropertyValue, string propertyName)
+        {
+            var akcjeLista = GetDataFromFile();
+            foreach (var akcja in akcjeLista)
+            {
+                var propertyValue = funcGetPropertyValue(akcja);
+
+                if (propertyValue == "-")
+                {
+                    Assert.IsTrue(true);
+                }
+                else
+                {
+                    string message = $"Nazwa spółki:{akcja.Nazwa}, {propertyName}: {propertyValue}";
+                    Assert.DoesNotThrow(() => uint.Parse(propertyValue), message);
+                }
+
+            }
+        }    
     }
 }
