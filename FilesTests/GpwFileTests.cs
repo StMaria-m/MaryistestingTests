@@ -8,15 +8,69 @@ using System.IO;
 using System.Text;
 using System.Linq;
 using FilesTests.Models;
+using ExcelDataReader;
 
 namespace FilesTests
 {
     public class GpwFileTests
-    {        
+    {
+        private IList<GpwModel> GetDataFromXLS()
+        {
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            var a = $"{AppDomain.CurrentDomain.BaseDirectory}\\Data//akcje_2021-12-03.xlsx";
+            using (var stream = File.Open(a, FileMode.Open, FileAccess.Read))
+            {
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    IList<GpwModel> akcjeListaObiektow = new List<GpwModel>();
+
+                    while (reader.Read())
+                    {
+                        // Gdy wartość pierwszej komórki jest pusta to pomin wiersz
+                        if (reader.GetValue(0) == null)
+                        {
+                            continue;
+                        }
+
+                        GpwModel akcja = new GpwModel();
+
+                        akcja.Nazwa = reader.GetValue(0).ToString();
+                        akcja.Skrot = reader.GetValue(1).ToString();
+                        akcja.Waluta = reader.GetValue(2).ToString();
+                        akcja.CzasOstatniejTransakcji = reader.GetValue(3).ToString();
+                        akcja.KursOdniesienia = reader.GetValue(4).ToString();
+                        akcja.TKO = reader.GetValue(5).ToString();
+                        akcja.KursOtwarcia = reader.GetValue(6).ToString();
+                        akcja.KursMin = reader.GetValue(7).ToString();
+                        akcja.KursMax = reader.GetValue(8).ToString();
+                        akcja.KursOstTransZamkn = reader.GetValue(9).ToString();
+                        akcja.ZmianaDoKursuOdn = reader.GetValue(10).ToString();
+                        akcja.KupnoLiczbaZlecen = reader.GetValue(11).ToString();
+                        akcja.KupnoWolumen = reader.GetValue(12).ToString();
+                        akcja.KupnoLimit = reader.GetValue(13).ToString();
+                        akcja.SprzedazLimit = reader.GetValue(14).ToString();
+                        akcja.SprzedazWolumen = reader.GetValue(15).ToString();
+                        akcja.SprzedazLiczbaZlecen = reader.GetValue(16).ToString();
+                        akcja.WolumenOstTrans = reader.GetValue(17).ToString();
+                        akcja.LiczbaTransakcji = reader.GetValue(18).ToString();
+                        akcja.WolObrSkumul = reader.GetValue(19).ToString();
+                        akcja.WartObrSkumul = reader.GetValue(20).ToString();
+
+                        akcjeListaObiektow.Add(akcja);
+
+                    }
+                    return akcjeListaObiektow;
+                }
+            }
+        }
+
+
+
         [Test]
         public void CheckIfNamesAreUnique()
         {
-            var akcjeLista = GetDataFromFile();
+            IList<GpwModel> akcjeLista = GetDataFromXLS();
+            //IList<GpwModel> akcjeLista = PobierzZXls();
 
             List<string> nazwyLista = new List<string>();
 
@@ -42,6 +96,9 @@ namespace FilesTests
             return JsonConvert.DeserializeObject<IList<GpwModel>>(dataString);
         }
 
+
+
+
         [Test]
         public void CheckIfNamesAreNotNull()
         {
@@ -56,7 +113,7 @@ namespace FilesTests
 
         private void CheckIfStringIsNullOrEmpty(Func<GpwModel, string> funcGetPropertyName)
         {
-            var akcjeLista = GetDataFromFile();
+            var akcjeLista = GetDataFromXLS();
 
             bool isAny = akcjeLista.Any(i => String.IsNullOrEmpty(funcGetPropertyName(i)));
             Assert.IsFalse(isAny);
@@ -160,7 +217,7 @@ namespace FilesTests
                     Assert.DoesNotThrow(() => uint.Parse(akcja.SprzedazWolumen), message);
                 }
             }
-        }        
+        }
 
         [Test]
         public void CheckIfNumberOfMarketOrderIsInteger()
@@ -192,6 +249,6 @@ namespace FilesTests
                 }
 
             }
-        }    
+        }
     }
 }
