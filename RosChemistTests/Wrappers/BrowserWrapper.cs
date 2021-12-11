@@ -19,15 +19,15 @@ namespace RosChemistTests.Wrappers
         public BrowserWrapper(AppSettingsModel appSettings)
         {
             _appSettings = appSettings;
-        }      
+        }
 
-        public IWebDriver GetWebDriver() => _webDriver; 
+        public IWebDriver GetWebDriver() => _webDriver;
 
         public void CreateWebDriver(string path = null)
         {
             _webDriver = new ChromeDriver();
             _webDriver.Manage().Window.Maximize();
-            _webDriver.Url = $"{_appSettings.BaseUrl}/{path}";     
+            _webDriver.Url = $"{_appSettings.BaseUrl}/{path}";
         }
 
         public void AddCookie()
@@ -46,7 +46,8 @@ namespace RosChemistTests.Wrappers
         public void WaitForAction(string selector, SearchByTypeEnums selectorType = SearchByTypeEnums.CssSelector)
         {
             var wait = new WebDriverWait(_webDriver, TimeSpan.FromSeconds(10));
-            wait.Until(driver => {
+            wait.Until(driver =>
+            {
                 var selectorFunction = selectorType == SearchByTypeEnums.CssSelector ? By.CssSelector(selector) : By.XPath(selector);
 
                 var element = driver.FindElements(selectorFunction).FirstOrDefault();
@@ -56,6 +57,14 @@ namespace RosChemistTests.Wrappers
                 }
                 return element.Displayed;
             });
+        }
+
+        public static IWebDriver OpenBrowser(AppSettingsModel appSettings, string endPoint = null)
+        {
+            BrowserWrapper browserWrapper = new BrowserWrapper(appSettings);
+            browserWrapper.CreateWebDriver(endPoint);
+            browserWrapper.AddCookie();
+            return browserWrapper.GetWebDriver();
         }
     }
 }
