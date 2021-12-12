@@ -59,12 +59,19 @@ namespace RosChemistTests.Wrappers
             });
         }
 
-        public static IWebDriver OpenBrowser(AppSettingsModel appSettings, string endPoint = null)
+        public void AcceptCookies()
+        {
+            string buttonSelector = ".card-body .btn-primary";
+            WaitForAction(buttonSelector);
+            _webDriver.FindElement(By.CssSelector(buttonSelector)).Click();
+        }
+
+        public static BrowserWrapper OpenBrowser(AppSettingsModel appSettings, string endPoint = null)
         {
             BrowserWrapper browserWrapper = new BrowserWrapper(appSettings);
             browserWrapper.CreateWebDriver(endPoint);
             browserWrapper.AddCookie();
-            return browserWrapper.GetWebDriver();
+            return browserWrapper;
         }
     }
 }
