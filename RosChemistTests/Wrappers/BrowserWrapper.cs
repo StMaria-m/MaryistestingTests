@@ -61,7 +61,7 @@ namespace RosChemistTests.Wrappers
 
         public void AcceptCookies()
         {
-            string buttonSelector = ".card-body .btn-primary";
+            string buttonSelector = "#onetrust-accept-btn-handler";
             WaitForAction(buttonSelector);
             _webDriver.FindElement(By.CssSelector(buttonSelector)).Click();
         }
