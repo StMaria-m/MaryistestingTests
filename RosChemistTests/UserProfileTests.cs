@@ -29,7 +29,8 @@ namespace RosChemistTests
         [TestCase("profil/ulubione", "Nie masz jeszcze ulubionych")]
         public void CheckIfPurchaseHistoryAndFavouritesIsEmptyTest(string endPoint, string text)
         {
-            var webDriver = BrowserWrapper.OpenBrowser(_appSettings, endPoint);
+            var webDriver = BrowserWrapper.OpenBrowser(_appSettings, endPoint)
+                .GetWebDriver();
 
             ProcessStepHeplers.LogInSteps(webDriver, _appSettings);
 
@@ -44,7 +45,8 @@ namespace RosChemistTests
         [Test]
         public void LogInTest()
         {
-            var webDriver = BrowserWrapper.OpenBrowser(_appSettings);
+            var webDriver = BrowserWrapper.OpenBrowser(_appSettings)
+                .GetWebDriver();
 
             var expectedUrl = $"{_appSettings.BaseUrl}/profil/ustawienia-konta";
             webDriver.Navigate().GoToUrl(expectedUrl);
